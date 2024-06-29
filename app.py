@@ -2,15 +2,21 @@ from typing import Final
 import os
 from dotenv import load_dotenv
 from discord import Intents, Client, Message
+from discord.ext import commands
 from summariser import summarize_document
+import os
+import asyncio
+
 # STEP 0: LOAD OUR TOKEN FROM SOMEWHERE SAFE
 load_dotenv()
 TOKEN: Final[str] = os.getenv('DISCORD_TOKEN')
 
 # STEP 1: BOT SETUP
-intents: Intents = Intents.default()
+intents: Intents = Intents.all()
 intents.message_content = True  # NOQA
-client: Client = Client(intents=intents)
+#client: Client = Client(intents=intents)
+bot = commands.Bot(command_prefix='!', intents=intents)
+
 
 # STEP 2: MESSAGE FUNCTIONALITY
 async def send_message(message: Message, user_message: str) -> None:
@@ -27,14 +33,14 @@ async def send_message(message: Message, user_message: str) -> None:
         print(e)
 
 # STEP 3: HANDLING THE STARTUP FOR OUR BOT
-@client.event
+@bot.event
 async def on_ready() -> None:
-    print(f'{client.user} is now running!')
+    print(f'{bot.user} is now running!')
 
 # STEP 4: HANDLING MESSAGES
-@client.event
+"""@bot.event
 async def on_message(message: Message) -> None:
-    if message.author == client.user:
+    if message.author == bot.user:
         return
 
     user_message = message.content
@@ -52,9 +58,10 @@ async def on_message(message: Message) -> None:
         messages.reverse()
 
         file_name = f'{message.author.name}.txt'
-        with open(file_name, 'w') as f:
+        with open(file_name, 'w', encoding='utf-8') as f:
             for msg in messages:
-                f.write(f'{msg.author.name}: {msg.content}\n')
+                if msg.author != bot.user:
+                    f.write(f'{msg.author.name}: {msg.content}\n')
 
         await message.channel.send(f'Collected the last {num_messages} messages and saved them to {file_name}')
 
@@ -67,15 +74,38 @@ async def on_message(message: Message) -> None:
             await message.channel.send(f'No collected messages found for {message.author.name}. Please use the !collect command first.')
 
     elif user_message == '!ping':
-        latency = round(client.latency * 1000)
+        latency = round(bot.latency * 1000)
         await message.channel.send(f'Pong! Latency is {latency}ms')
 
     else:
         await send_message(message, user_message)
+"""
+
+@bot.command(name="Help", description="Returns all commands available")
+async def Help(ctx):
+    helptext = "```"
+    for command in bot.commands:
+        helptext+=f"{command}\n"
+    helptext+="```"
+    await ctx.send(helptext)
+
+#Cog Loading
+async def load():
+    for filename in os.listdir("./cogs"):
+        if filename.endswith(".py"):
+            await bot.load_extension(f'cogs.{filename[:-3]}')
+
 
 # STEP 5: MAIN ENTRY POINT
-def main() -> None:
-    client.run(TOKEN)
+async def main() -> None:
+    async with bot:
+        await load()
+        await bot.start(TOKEN)
+
+
+
+
+
 
 if __name__ == '__main__':
-    main()
+    asyncio.run(main())

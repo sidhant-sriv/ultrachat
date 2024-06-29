@@ -1,4 +1,3 @@
-import discord
 from discord.ext import commands
 import hashlib
 import base64
@@ -37,6 +36,9 @@ class SHA256:
     def __str__(self):
         return self.hash
 
+    def __repr__(self):
+        return self.hash
+
 
 class MD5:
     def __init__(self, text):
@@ -46,35 +48,38 @@ class MD5:
     def __str__(self):
         return self.hash
 
+    def __repr__(self):
+        return self.hash
+
 
 class Cryptography(commands.Cog):
-    def __init__(self, client):
-        self.client = client
+    def __init__(self, bot):
+        self.bot = bot
 
-    @commands.command()
+    @commands.command(name="caeser_e")
     async def caeser_e(self, ctx, *, text):
         await ctx.send("```{}```".format(CaeserCipher().encrypt(text)))
 
-    @commands.command()
+    @commands.command(name="caeser_d")
     async def caeser_d(self, ctx, key, *, text):
         await ctx.send("```{}```".format(CaeserCipher().decrypt(text, int(key))))
 
-    @commands.command()
+    @commands.command(name='sha256')
     async def sha256(self, ctx, *, text):
         await ctx.send("`SHA256 Hash: {}`".format(SHA256(text)))
 
-    @commands.command()
+    @commands.command(name='md5')
     async def md5(self, ctx, *, text):
         await ctx.send("MD5 Hash: `{}`".format(MD5(text)))
 
-    @commands.command()
+    @commands.command(name='base64_e')
     async def base64_e(self, ctx, *, text):
         await ctx.send("```{}```".format(base64.b64encode(text.encode('utf-8')).decode('utf-8')))
 
-    @commands.command()
+    @commands.command(name='base64_d')
     async def base64_d(self, ctx, *, text):
         await ctx.send("```{}```".format(base64.b64decode(text.encode('utf-8')).decode('utf-8')))
 
 
-def setup(client):
-    client.add_cog(Cryptography(client))
+async def setup(bot):
+    await bot.add_cog(Cryptography(bot))
