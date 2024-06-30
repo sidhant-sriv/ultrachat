@@ -1,9 +1,8 @@
 from typing import Final
-import os
 from dotenv import load_dotenv
 from discord import Intents, Client, Message
 from discord.ext import commands
-from summariser import summarize_document
+
 import os
 import asyncio
 
@@ -16,7 +15,7 @@ intents: Intents = Intents.all()
 intents.message_content = True  # NOQA
 #client: Client = Client(intents=intents)
 bot = commands.Bot(command_prefix='!', intents=intents)
-
+EXCLUDED_FILES = [] #files that might be in the cogs folder but need not to be loaded
 
 # STEP 2: MESSAGE FUNCTIONALITY
 async def send_message(message: Message, user_message: str) -> None:
@@ -81,8 +80,8 @@ async def on_message(message: Message) -> None:
         await send_message(message, user_message)
 """
 
-@bot.command(name="Help", description="Returns all commands available")
-async def Help(ctx):
+@bot.command(name="commands", description="Returns all commands available")
+async def commands(ctx):
     helptext = "```"
     for command in bot.commands:
         helptext+=f"{command}\n"
@@ -92,7 +91,7 @@ async def Help(ctx):
 #Cog Loading
 async def load():
     for filename in os.listdir("./cogs"):
-        if filename.endswith(".py"):
+        if filename.endswith(".py") and filename not in EXCLUDED_FILES:
             await bot.load_extension(f'cogs.{filename[:-3]}')
 
 
