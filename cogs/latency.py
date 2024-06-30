@@ -3,13 +3,12 @@ from discord.ext import commands
 
 class Latency(commands.Cog):
     """Latency commands"""
-    def __init__(self,client):
-        self.client = client
-
-    @commands.command()
+    def __init__(self, bot):
+        self.bot = bot
+    @commands.command(aliases= ['ping', 'latency'])
     async def latency(self,ctx):
         """Returns latency"""
         await ctx.send(f'The latency is {round(self.client.latency *1000)} ms')
 
-def setup(client):
-    client.add_cog(Latency(client))
+async def setup(bot):
+    await bot.add_cog(Latency(bot))

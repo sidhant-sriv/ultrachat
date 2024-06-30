@@ -26,5 +26,5 @@ class ImageManipulation(commands.Cog):
         await ctx.send(res)
 
 
-def setup(bot):
-    bot.add_cog(ImageManipulation(bot))
+async def setup(bot):
+    await bot.add_cog(ImageManipulation(bot))

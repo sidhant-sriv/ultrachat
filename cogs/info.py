@@ -6,16 +6,16 @@ import wikipedia
 
 class Info(commands.Cog):
     """Info giving commands"""
-    def __init__(self, client):
-        self.client = client
+    def __init__(self, bot):
+        self.bot = bot
 
-    @commands.command(description="Gives the first google result")
+    @commands.command(name='google', description="Gives the first google result")
     async def google(self, ctx, *, query):
         """Google search"""
         for j in search(query, tld="co.in", num=2, stop=2, pause=1):
             await ctx.send(j)
 
-    @commands.command(description="Wikipedia")
+    @commands.command(name = 'wiki', description="Wikipedia")
     async def wiki(self, ctx, *, query):
         """Wikipedia search"""
         try:
@@ -29,5 +29,5 @@ class Info(commands.Cog):
             await ctx.send(f"Here is a page with all the links that contain {query} <https://en.wikipedia.org/wiki/"+query.title()+">")
 
 
-def setup(client):
-    client.add_cog(Info(client))
+async def setup(bot):
+    await bot.add_cog(Info(bot))
