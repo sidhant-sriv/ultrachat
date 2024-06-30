@@ -32,7 +32,7 @@ class XKCD(c.Cog):
         except AttributeError:
             return "\U00002754 Can't find that comic."
 
-    @c.group(pass_context=True)
+    @c.group(pass_context=True, name='xkcd')
     async def xkcd(self, ctx):
         """
         Running the command without arguments will display a random comic.
@@ -66,5 +66,5 @@ class XKCD(c.Cog):
         await ctx.send(embed=res)
 
 
-def setup(bot):
-    bot.add_cog(XKCD(bot))
+async def setup(bot):
+    await bot.add_cog(XKCD(bot))

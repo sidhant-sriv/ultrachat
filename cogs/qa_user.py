@@ -170,5 +170,5 @@ class User(commands.Cog):
         print(output)
         await ctx.send("```{}```".format(output["answer"]))
 
-def setup(bot):
-    bot.add_cog(User(bot))
+async def setup(bot):
+    await bot.add_cog(User(bot))

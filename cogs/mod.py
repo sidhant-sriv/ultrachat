@@ -7,7 +7,7 @@ class Mod(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name='clear')
+    @commands.command(name='delete')
     @commands.has_permissions(manage_messages=True)
     async def clear(self, ctx, amount=10):
         """Delete stuff"""
@@ -24,5 +24,5 @@ class Mod(commands.Cog):
     async def ban(self,ctx,member: discord.Member,*,reason="lol bye"):
         """Ban people"""
         await member.ban(reason=reason)
-def setup(bot):
-    bot.add_cog(Mod(bot))
+async def setup(bot):
+    await bot.add_cog(Mod(bot))

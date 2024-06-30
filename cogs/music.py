@@ -237,7 +237,7 @@ class Music(commands.Cog):
             await ctx.message.add_reaction('👍')
         await ctx.send(f'**Joined `{channel}`**')
 
-    @commands.command(name='play', aliases=['sing', 'p'], description="streams music")
+    @commands.command(name='play', aliases=['p'], description="streams music")
     async def play_(self, ctx, *, search: str):
         """Request a song and add it to the queue.
         This command attempts to join a valid voice channel if the bot is not already in one.
@@ -335,7 +335,7 @@ class Music(commands.Cog):
                     title="", description=f'Could not find a track for "{pos}"', color=discord.Color(0xB0B0BF))
                 await ctx.send(embed=embed)
 
-    @commands.command(name='clrq', aliases=['clr', 'cl', 'cr'], description="clears entire queue")
+    @commands.command(name='clear_queue', aliases=['clr', 'cl', 'cr'], description="clears entire queue")
     async def clear_(self, ctx):
         """Deletes entire queue of upcoming songs."""
 
@@ -478,5 +478,5 @@ class Music(commands.Cog):
         await self.cleanup(ctx.guild)
 
 
-def setup(bot):
-    bot.add_cog(Music(bot))
+async def setup(bot):
+    await bot.add_cog(Music(bot))

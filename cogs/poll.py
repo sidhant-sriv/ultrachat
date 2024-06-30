@@ -8,7 +8,7 @@ class Poll(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(pass_context=True)
+    @commands.command(pass_context=True, name='poll')
     async def poll(self, ctx, question, *options: str):
         if len(options) <= 1:
             await self.bot.say('You need more than one option to make a poll!')
@@ -32,7 +32,7 @@ class Poll(commands.Cog):
         embed.set_footer(text='Poll ID: {}'.format(react_message.id))
         await self.bot.edit_message(react_message, embed=embed)
 
-    @commands.command(pass_context=True)
+    @commands.command(pass_context=True, name='tally')
     async def tally(self, ctx, id):
         poll_message = await self.bot.get_message(ctx.message.channel, id)
         if not poll_message.embeds:
@@ -62,5 +62,5 @@ class Poll(commands.Cog):
         await self.bot.send(output)
 
 
-def setup(bot):
-    bot.add_cog(Poll(bot))
+async def setup(bot):
+    await bot.add_cog(Poll(bot))

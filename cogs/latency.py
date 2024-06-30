@@ -5,7 +5,7 @@ class Latency(commands.Cog):
     """Latency commands"""
     def __init__(self, bot):
         self.bot = bot
-    @commands.command(aliases= ['ping', 'latency'])
+    @commands.command(aliases= ['ping'])
     async def latency(self,ctx):
         """Returns latency"""
         await ctx.send(f'The latency is {round(self.client.latency *1000)} ms')
