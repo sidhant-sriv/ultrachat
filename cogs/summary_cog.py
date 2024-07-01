@@ -1,3 +1,4 @@
+from discord.ext import commands
 from llama_index.llms.groq import Groq
 from llama_index.core import Settings, SimpleDirectoryReader, get_response_synthesizer, DocumentSummaryIndex
 from llama_index.core.node_parser import SentenceSplitter
@@ -54,3 +55,43 @@ def summarize_document(file_name='message_history.txt', query="What is the summa
     # Return the query result
     return query_engine.query(query)
 
+
+
+
+class Summary(commands.Cog):
+
+    def __init__(self, bot):
+        self.bot = bot
+
+    @commands.command(name="collect")
+    async def collect(self, ctx, num):
+        try:
+            num_messages = int(num)
+        except (IndexError, ValueError):
+            num_messages = 10
+
+        messages = []
+        async for msg in ctx.channel.history(limit=num_messages):
+            messages.append(msg)
+
+        messages.reverse()
+
+        file_name = f'{ctx.author.name}.txt'
+        with open(file_name, 'w', encoding='utf-8') as f:
+            for msg in messages:
+                if msg.author != self.bot.user:
+                    f.write(f'{msg.author.name}: {msg.content}\n')
+
+        await ctx.channel.send(f'Collected the last {num_messages} messages and saved them to {file_name}')
+    @commands.command(name="summary")
+    async def summary(self, ctx):
+        file_name = f'{ctx.author.name}.txt'
+        if os.path.exists(file_name):
+            summary = summarize_document(file_name)
+            await ctx.channel.send(f'*Summary*:\n {summary}')
+        else:
+            await ctx.channel.send(
+                f'No collected messages found for {ctx.author.name}. Please use the !collect command first.')
+
+async def setup(bot):
+    await bot.add_cog(Summary(bot))
