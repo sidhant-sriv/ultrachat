@@ -19,7 +19,7 @@ class Fun(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(aliases=['8ball'])
+    @commands.command(name='8ball')
     async def _8ball(self, ctx, *, question):
         """Magic 8ball"""
         responses = ["It is certain.",
