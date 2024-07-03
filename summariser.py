@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 import os
 import nest_asyncio
 
-def summarize_document(file_name='message_history.txt', query="What is the summary of this chat log? Answer casually and also tell me the users involved"):
+def summarize_document(file_name='message_history.txt', query=""):
     # Apply nest_asyncio
     nest_asyncio.apply()
 
@@ -52,5 +52,5 @@ def summarize_document(file_name='message_history.txt', query="What is the summa
     query_engine = doc_summary_index.as_query_engine(response_mode="tree_summarize", use_async=True)
 
     # Return the query result
-    return query_engine.query(query)
+    return query_engine.query("Summarize this chat log." + query)
 
