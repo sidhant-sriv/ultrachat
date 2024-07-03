@@ -45,36 +45,8 @@ class Fun(commands.Cog):
         res = discord.Embed(title=f'Question : **{question}**',description=f'Answer: **{random.choice(responses)}**')
         await ctx.send(embed=res)
 
-    @commands.command(name='meme')
-    async def meme(self, ctx):
-        """Gets memes from Reddit"""
-        reddit = praw.Reddit(client_id=REDDIT_CLIENT_ID, client_secret=REDDIT_CLIENT_SECRET,
-                             user_agent=REDDIT_USER_AGENT, check_for_async=False)
-        post = reddit.subreddit(
-            'memes+dankmemes+me_irl+MadeMeSmile+cursedcomments').hot(limit=20)
-        post = [i for i in post]
-        post = random.choice(post)
-        res = discord.Embed(
-            title=f'**{post.title}**', url=f'https://reddit.com{post.permalink}', colour=discord.Colour(0x000000))
-        res.set_footer(text=f'{post.score} 👍')
-        res.set_image(url=post.url)
-        await ctx.send(embed=res)
 
-    @commands.command(name='joke')
-    async def joke(self, ctx):
-        """Returns a joke from r/Jokes and r/darkjokes"""
-        reddit = praw.Reddit(client_id=REDDIT_CLIENT_ID, client_secret=REDDIT_CLIENT_SECRET,
-                             user_agent=REDDIT_USER_AGENT, check_for_async=False)
-
-        post = reddit.subreddit('Jokes+darkjokes').hot(limit=30)
-        post = [i for i in post]
-        post = random.choice(post)
-
-        res = discord.Embed(
-            title=f'**{post.title}**', url=f'https://reddit.com{post.permalink}', description=post.selftext, colour=discord.Colour(0x000000))
-        await ctx.send(embed=res)
-
-    @commands.command(aliases=["senti"])
+    @commands.command(name="senti")
     async def sentiment(self, ctx, *, sentence):
         """Returns sentiment of a sentence"""
         if sentence:

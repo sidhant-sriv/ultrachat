@@ -65,6 +65,7 @@ class Summary(commands.Cog):
 
     @commands.command(name="collect")
     async def collect(self, ctx, num):
+        """Collects a given number of messages in channel and saves it"""
         try:
             num_messages = int(num)
         except (IndexError, ValueError):
@@ -85,6 +86,7 @@ class Summary(commands.Cog):
         await ctx.channel.send(f'Collected the last {num_messages} messages and saved them to {file_name}')
     @commands.command(name="summary")
     async def summary(self, ctx):
+        """provides a summary of a given chat log saved by the collect command"""
         file_name = f'{ctx.author.name}.txt'
         if os.path.exists(file_name):
             summary = summarize_document(file_name)

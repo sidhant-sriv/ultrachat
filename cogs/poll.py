@@ -10,6 +10,7 @@ class Poll(commands.Cog):
 
     @commands.command(pass_context=True, name='poll')
     async def poll(self, ctx, question, *options: str):
+        """creates a poll"""
         if len(options) <= 1:
             await self.bot.say('You need more than one option to make a poll!')
             return
@@ -34,6 +35,7 @@ class Poll(commands.Cog):
 
     @commands.command(pass_context=True, name='tally')
     async def tally(self, ctx, id):
+        """Tallies the poll results"""
         poll_message = await self.bot.get_message(ctx.message.channel, id)
         if not poll_message.embeds:
             return

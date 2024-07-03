@@ -78,10 +78,12 @@ class Cryptography(commands.Cog):
 
     @commands.command(name='base64_e')
     async def base64_e(self, ctx, *, text):
+        "Returns a base64 encoded message"
         await ctx.send("```{}```".format(base64.b64encode(text.encode('utf-8')).decode('utf-8')))
 
     @commands.command(name='base64_d')
     async def base64_d(self, ctx, *, text):
+        "Returns a base64 decrypted message"
         await ctx.send("```{}```".format(base64.b64decode(text.encode('utf-8')).decode('utf-8')))
 
 

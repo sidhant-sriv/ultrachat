@@ -10,7 +10,7 @@ class Mod(commands.Cog):
     @commands.command(name='delete')
     @commands.has_permissions(manage_messages=True)
     async def clear(self, ctx, amount=10):
-        """Delete stuff"""
+        """Delete n number of messages in the channel"""
         await ctx.channel.purge(limit=amount+1)
 
     @commands.command(name='kick')
