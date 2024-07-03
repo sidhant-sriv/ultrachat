@@ -81,4 +81,4 @@ $RECYCLE.BIN/
 *.spec
 
 # Ignore all txt files
-*.txt
+message_history
