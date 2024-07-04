@@ -11,6 +11,7 @@ class Info(commands.Cog):
 
     @commands.command(name='google', description="Gives the first google result")
     async def google(self, ctx, *, query):
+        print('damn')
         """Google search"""
         for j in search(query, tld="co.in", num=2, stop=2, pause=1):
             await ctx.send(j)

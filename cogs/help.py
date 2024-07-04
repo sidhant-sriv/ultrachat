@@ -33,7 +33,7 @@ command_args = {
     'caeser_d': '!caeser_d <encoded message>',
     'md5': '!md5 <message>',
     'sha256': '!sha256 <message>',
-    '8ball': '!8ball',
+    '8ball': '!8ball <question>',
     'senti': '!senti <message>',
     'google': '!google <search term>',
     'wiki': '!wiki <search term>',
