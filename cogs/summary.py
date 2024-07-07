@@ -65,6 +65,7 @@ class Summary(commands.Cog):
 
     @commands.command(name="collect")
     async def collect(self, ctx, num):
+        print('what?')
         """Collects a given number of messages in channel and saves it"""
         try:
             num_messages = int(num)
