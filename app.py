@@ -26,7 +26,11 @@ for i in EXCLUDED_COMMANDS:
 @bot.event
 async def on_ready() -> None:
     print(f'{bot.user} is now running!')
-
+    try:
+        synced = await bot.tree.sync()
+        print(f"Synced {len(synced)} commands")
+    except Exception as e:
+        print("exception in command syncing:", e)
 
 @bot.command(name="commands", description="Returns all commands available")
 async def commands(ctx):
@@ -37,11 +41,13 @@ async def commands(ctx):
     await ctx.send(helptext)
 
 #STEP 3: Cog Loading
-async def load():
-    '''loads cogs present in .\cogs'''
+async def load() -> None:
+    """loads cogs present in .\\cogs"""
     for filename in os.listdir("./cogs"):
         if filename.endswith(".py") and filename not in EXCLUDED_FILES:
             await bot.load_extension(f'cogs.{filename[:-3]}')
+
+
 
 
 # STEP 4: MAIN ENTRY POINT

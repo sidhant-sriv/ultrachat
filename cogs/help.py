@@ -1,9 +1,10 @@
 from datetime import datetime
-
+import os
 import discord
 from discord.ext import commands
 
-thumbnail = 'https://res.cloudinary.com/startup-grind/image/upload/c_fill,dpr_2,f_auto,g_center,q_auto:good/v1/gcs/platform-data-dsc/contentbuilder/GDG-Bevy-ChapterThumbnail.png'
+thumbnail = os.getenv('EMBED_THUMBNAIL')
+
 help_text = {
     'help': 'Lists all available commands and their description',
     'base64_e': 'Encodes a given message in base64 format',
@@ -41,7 +42,7 @@ command_args = {
     'kick': '!kick <user mention> / !kick <user mention> <reason>',
     'delete': '!delete / !delete <number of messages>',
     'collect': '!collect <number of messages>',
-    'summary': '!summary',
+    'summary': '!summary <option for dm (p, priv, private, dm)>',
     'xkcd': '!xkcd'
 }
 
