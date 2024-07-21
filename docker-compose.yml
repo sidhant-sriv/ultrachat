@@ -7,20 +7,3 @@ services:
       dockerfile: Dockerfile # Replace with your actual Dockerfile name if different
     env_file:
       - .env
-    depends_on:
-      - backend-server
-    networks:
-      - bot_network
-
-  backend-server:
-    build:
-      context: /Users/amansingh/Desktop/Aman GDSC/ultra-chat-backend # Path to your backend application directory
-      dockerfile: Dockerfile # Replace with your actual Dockerfile name if different
-    ports:
-      - "5001:5001"
-    networks:
-      - bot_network
-
-networks:
-  bot_network:
-    driver: bridge

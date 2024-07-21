@@ -105,7 +105,7 @@ class Summary(commands.Cog):
 
         await ctx.channel.send(f'Collected the last {num_messages} messages and saved them to {file_name}')
         save_path = os.path.join(file_directory, 'embeddings')
-        query.generate_embeddings(save_path=save_path, documents_path=file_directory)
+        await query.generate_embeddings(save_path=save_path, documents_path=file_directory)
     
     async def is_authenticated(self, user_id):
         """Check if the user is authenticated."""
@@ -172,11 +172,8 @@ class Summary(commands.Cog):
                 print(f"Response status code: {response.status}")
                 print(f"Response data: {response_json}")
 
-    @commands.command(name="query")
-    async def question(self, ctx, prompt):
-        file_directory = f'.chats/{ctx.author.name}/{ctx.channel.id}'
-        embedding_path = os.path.join(file_directory, 'embeddings')
-        print(query.query(prompt, embedding_path=embedding_path))
+
+
 
 async def setup(bot):
     await bot.add_cog(Summary(bot))
