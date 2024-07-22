@@ -106,6 +106,7 @@ class Summary(commands.Cog):
         await ctx.channel.send(f'Collected the last {num_messages} messages and saved them to {file_name}')
         save_path = os.path.join(file_directory, 'embeddings')
         await query.generate_embeddings(save_path=save_path, documents_path=file_directory)
+        await ctx.channel.send('Embeddings generated, ready for querying')
     
     async def is_authenticated(self, user_id):
         """Check if the user is authenticated."""
