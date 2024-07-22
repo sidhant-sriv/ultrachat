@@ -9,11 +9,6 @@ class Info(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name='google', description="Gives the first google result")
-    async def google(self, ctx, *, query):
-        """Google search"""
-        for j in search(query, tld="co.in", num=2, stop=2, pause=1):
-            await ctx.send(j)
 
     @commands.command(name = 'wiki', description="Wikipedia")
     async def wiki(self, ctx, *, query):

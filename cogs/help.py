@@ -1,9 +1,10 @@
 from datetime import datetime
-
+import os
 import discord
 from discord.ext import commands
 
-thumbnail = 'https://res.cloudinary.com/startup-grind/image/upload/c_fill,dpr_2,f_auto,g_center,q_auto:good/v1/gcs/platform-data-dsc/contentbuilder/GDG-Bevy-ChapterThumbnail.png'
+thumbnail = os.getenv('EMBED_THUMBNAIL')
+
 help_text = {
     'help': 'Lists all available commands and their description',
     'base64_e': 'Encodes a given message in base64 format',
@@ -22,7 +23,9 @@ help_text = {
     'delete': 'Deletes last n messages in channel (n defaults to 10)',
     'collect': 'Saves a copy of the last n messages in the given channel',
     'summary': 'Provides a summary of saved chatlog. Must only be used after collect',
-    'xkcd': 'Displays a random comic'
+    'xkcd': 'Displays a random comic',
+    'query': 'Answers a question with regards to a specific server',
+    'regenerate_embeddings': 'Regenerates the context for querying with the latest saved chat log'
 }
 
 command_args = {
@@ -33,17 +36,18 @@ command_args = {
     'caeser_d': '!caeser_d <encoded message>',
     'md5': '!md5 <message>',
     'sha256': '!sha256 <message>',
-    '8ball': '!8ball',
+    '8ball': '!8ball <question>',
     'senti': '!senti <message>',
-    'google': '!google <search term>',
     'wiki': '!wiki <search term>',
     'ping': '!ping',
     'ban': '!ban <user mention> / !ban <user mention> <reason>',
     'kick': '!kick <user mention> / !kick <user mention> <reason>',
     'delete': '!delete / !delete <number of messages>',
     'collect': '!collect <number of messages>',
-    'summary': '!summary',
-    'xkcd': '!xkcd'
+    'summary': '!summary <option for dm (p, priv, private, dm)>',
+    'xkcd': '!xkcd',
+    'query': '!query <prompt>',
+    'regenerate_embeddings': '!regenerate_embeddings'
 }
 
 
