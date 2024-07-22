@@ -23,7 +23,9 @@ help_text = {
     'delete': 'Deletes last n messages in channel (n defaults to 10)',
     'collect': 'Saves a copy of the last n messages in the given channel',
     'summary': 'Provides a summary of saved chatlog. Must only be used after collect',
-    'xkcd': 'Displays a random comic'
+    'xkcd': 'Displays a random comic',
+    'query': 'Answers a question with regards to a specific server',
+    'regenerate_embeddings': 'Regenerates the context for querying with the latest saved chat log'
 }
 
 command_args = {
@@ -43,7 +45,9 @@ command_args = {
     'delete': '!delete / !delete <number of messages>',
     'collect': '!collect <number of messages>',
     'summary': '!summary <option for dm (p, priv, private, dm)>',
-    'xkcd': '!xkcd'
+    'xkcd': '!xkcd',
+    'query': '!query <prompt>',
+    'regenerate_embeddings': '!regenerate_embeddings'
 }
 
 
