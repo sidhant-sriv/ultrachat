@@ -42,7 +42,7 @@ class Fun(commands.Cog):
                      "My sources say no.",
                      "Outlook not so good.",
                      "Very doubtful."]
-        res = discord.Embed(title=f'Question : **{question}**',description=f'Answer: **{random.choice(responses)}**')
+        res = discord.Embed(title=f'Question : **{question}**',description=f'Answer: **{random.choice(responses)}**', color=0xB0B0BF)
         await ctx.send(embed=res)
 
 
@@ -51,7 +51,7 @@ class Fun(commands.Cog):
         """Returns sentiment of a sentence"""
         if sentence:
             words = TextBlob(sentence)
-            res = discord.Embed(title=f'{sentence}', description= f'Calculated sentiment {words.sentiment.polarity}')
+            res = discord.Embed(title=f'{sentence}', description= f'Calculated sentiment {words.sentiment.polarity}', color=0xB0B0BF)
             res.set_footer(text="If value>0 then positive, <0 then negative and =0 then neutral sentiment")
             await ctx.send(embed=res)
     @commands.command(name = 'imgur')
