@@ -9,6 +9,10 @@ from llama_index.vector_stores.chroma import ChromaVectorStore
 from llama_index.core import StorageContext
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 from llama_index.core import Settings
+from llama_index.core.node_parser import SentenceSplitter
+from llama_index.core.extractors import TitleExtractor
+from llama_index.core.ingestion import IngestionPipeline
+import asyncio
 
 load_dotenv()
 GROQ = os.getenv('GROQ')
