@@ -15,7 +15,6 @@ help_text = {
     'sha256': 'Encodes a given message using the SHA256',
     '8ball': 'Magic 8ball',
     'senti': 'conducts sentiment analysis on a given message',
-    'google': 'Conducts a google search on a given search term',
     'wiki': 'Returns a wiki article link on the given search term',
     'ping': 'Returns bot latency',
     'ban': 'Bans mentioned user',

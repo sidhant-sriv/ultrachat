@@ -93,20 +93,49 @@ class Summary(commands.Cog):
 
         file_directory = f'chats/{ctx.author.name}/{ctx.message.guild.name}'
         file_name = f'{ctx.message.channel.name}.txt'
-        full_path = os.path.join(file_directory, file_name)
+        chat_path = os.path.join(file_directory, file_name)
 
-        if not os.path.exists(full_path):
+        if not os.path.exists(chat_path):
             query.create_folders_and_file(file_directory, file_name)
 
-        with open(full_path, 'w', encoding='utf-8') as f:
+        with open(chat_path, 'w', encoding='utf-8') as f:
             for msg in messages:
                 if msg.author != self.bot.user:
-                    f.write(f'{msg.author.name}: {msg.content}\n')
+                    f.write(f'{msg.author.name}(id:{msg.id}): {msg.content}\n')
 
         await ctx.channel.send(f'Collected the last {num_messages} messages and saved them to {file_name}')
-        save_path = os.path.join(file_directory, 'embeddings')
-        await query.generate_embeddings(save_path=save_path, documents_path=file_directory)
-        await ctx.channel.send('Embeddings generated, ready for querying')
+
+        vector_store_directory = f'vectors/{ctx.guild.id}/common'
+        if str(ctx.channel.type) == "private":
+            vector_store_directory = f'vectors/{ctx.guild.id}/private/{ctx.channel.id}'
+
+        file_name = f'all_text.txt'
+        all_chat_path = os.path.join(vector_store_directory, file_name)
+        save_path = os.path.join(vector_store_directory, 'embeddings')
+        temp_path = os.path.join(vector_store_directory, 'TEMP')
+        temp_file = os.path.join(temp_path, 'temp.txt')
+
+        if not os.path.exists(all_chat_path):
+            query.create_folders_and_file(vector_store_directory, file_name)
+
+        if not os.path.exists(temp_file):
+            query.create_folders_and_file(temp_path, 'TEMP.txt')
+
+        with open(all_chat_path, 'a+', encoding='utf-8') as all_chat:
+            with open(chat_path, 'r', encoding='utf-8') as chat:
+                with open(temp_file, 'a+', encoding='utf-8') as temp:
+                    messages = chat.readlines()
+                    all_messages = all_chat.readlines()
+                    for message in messages:
+                        if message not in all_messages:
+                            all_chat.write('\n'+message)
+                            temp.write('\n'+message)
+                    await query.generate_embeddings(save_path=save_path, documents_path=temp_path)
+                with open(temp_file, 'w', encoding='utf-8'):
+                    pass
+
+
+
     
     async def is_authenticated(self, user_id):
         """Check if the user is authenticated."""

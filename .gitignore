@@ -84,5 +84,5 @@ $RECYCLE.BIN/
 message_history
 *.txt
 chats/
-
+vectors/
 testing.py
