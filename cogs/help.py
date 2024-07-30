@@ -24,7 +24,6 @@ help_text = {
     'summary': 'Provides a summary of saved chatlog. Must only be used after collect',
     'xkcd': 'Displays a random comic',
     'query': 'Answers a question with regards to a specific server',
-    'regenerate_embeddings': 'Regenerates the context for querying with the latest saved chat log'
 }
 
 command_args = {
@@ -46,7 +45,6 @@ command_args = {
     'summary': '!summary <option for dm (p, priv, private, dm)>',
     'xkcd': '!xkcd',
     'query': '!query <prompt>',
-    'regenerate_embeddings': '!regenerate_embeddings'
 }
 
 

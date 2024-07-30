@@ -1,9 +1,7 @@
-from urllib import request
 from discord.ext import commands
 from discord import Embed, Colour
 import discord
 from datetime import datetime
-from llama_index.llms.groq import Groq
 from llama_index.core import get_response_synthesizer, DocumentSummaryIndex
 from llama_index.core.node_parser import SentenceSplitter
 import aiohttp
@@ -15,9 +13,7 @@ import os
 from dotenv import load_dotenv
 from llama_index.llms.groq import Groq
 import query
-import chromadb
-from llama_index.vector_stores.chroma import ChromaVectorStore
-from llama_index.core import StorageContext
+
 
 
 query_prompt = "Summarize the following Discord chat log in bullet point format, focusing on the key decisions made and the reasoning behind them. Keep the summary concise and informative."
