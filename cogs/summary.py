@@ -182,7 +182,21 @@ class Summary(commands.Cog):
                 await ctx.author.send(embed=summary_embed)
             else:
                 await ctx.channel.send(embed=summary_embed)
-#            print(f'Summary: {summary}')
+
+
+
+            file_directory = f'chats/{ctx.author.name}/{ctx.message.guild.name}/summaries'
+            file_name = f'1.txt'
+            summary_path = os.path.join(file_directory, file_name)
+
+            if os.path.exists(summary_path):
+                summary_path = query.create_folders_and_file(file_directory, next_file_name(file_directory))
+            else:
+                summary_path = query.create_folders_and_file(file_directory, '1.txt')
+
+            with open(summary_path, 'w', encoding='utf-8') as f:
+                f.write(str(summary))
+
 
         else:
             await ctx.channel.send(
@@ -200,6 +214,12 @@ class Summary(commands.Cog):
 
 
 
+
+
+def next_file_name(path:str):
+    files = map(int, [x[:-4] for x in os.listdir(path)])
+    name = str(max(files)+1)
+    return name+'.txt'
 
 async def setup(bot):
     await bot.add_cog(Summary(bot))

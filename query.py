@@ -43,6 +43,7 @@ def create_folders_and_file(folder_path, filename):
     with open(full_path, 'w') as f:
         pass
     print(f"Successfully created file: {full_path}")
+    return full_path
   except OSError as e:
     print(f"Error creating file: {e}")
 

@@ -5,9 +5,13 @@ import os
 from dotenv import load_dotenv
 import query
 import asyncio
+from pinecone.grpc import PineconeGRPC as Pinecone
+from pinecone import ServerlessSpec
+
 
 load_dotenv()
 thumbnail = os.getenv('EMBED_THUMBNAIL')
+pc = Pinecone(api_key=os.getenv('PINECONE_API'))
 
 class Querying(commands.Cog):
     def __init__(self, bot):
