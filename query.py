@@ -17,7 +17,7 @@ import asyncio
 load_dotenv()
 GROQ = os.getenv('GROQ')
 HF_TOKEN = os.getenv('HF_TOKEN')
-def create_folders_and_file(folder_path, filename):
+def create_folders_and_file(folder_path, filename) ->str:
   """
   Creates folders and subfolders if they don't exist and writes content to a file in the deepest folder.
 

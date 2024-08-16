@@ -5,12 +5,10 @@ import os
 from dotenv import load_dotenv
 import query
 import asyncio
-<<<<<<< HEAD
-=======
 from pinecone.grpc import PineconeGRPC as Pinecone
 from pinecone import ServerlessSpec
 
->>>>>>> tts
+
 
 load_dotenv()
 thumbnail = os.getenv('EMBED_THUMBNAIL')
@@ -42,7 +40,7 @@ class Querying(commands.Cog):
         else:
             await ctx.channel.send('No context found, use the collect command first')
 
-#    @commands.command()
+
 
 async def setup(bot):
     await bot.add_cog(Querying(bot))
