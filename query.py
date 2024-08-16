@@ -53,14 +53,15 @@ def create_folders_and_file(folder_path, filename) ->str:
 
 
 
-def generate_embeddings(documents_path:str, save_path:str)->None:
+def generate_embeddings(documents_path:str, index_name:str)->None:
     print("Generating embeddings...")
 
+    index_name = str(index_name)
     pc.create_index(
-        name="quickstart",
+        name=index_name,
         dimension=1024,
         metric="euclidean",
-        spec=ServerlessSpec(cloud="aws", region="us-west-2"),
+        spec=ServerlessSpec(cloud="aws", region='us-east-1'),
     )
 
     load_dotenv()
@@ -73,27 +74,31 @@ def generate_embeddings(documents_path:str, save_path:str)->None:
     embed_model = LangchainEmbedding(embeddings)
     Settings.embed_model = embeddings
 
-#    Settings.embed_model = HuggingFaceEmbedding(
-#    model_name = 'nomic-ai/nomic-embed-text-v1'
-#    )
+
 
     documents = SimpleDirectoryReader(documents_path).load_data()
-    db = chromadb.PersistentClient(path=save_path)
-    # create collection
-    chroma_collection = db.get_or_create_collection("quickstart")
+    pinecone_index = pc.Index(index_name)
 
-    vector_store = ChromaVectorStore(chroma_collection=chroma_collection)
+    vector_store = PineconeVectorStore(pinecone_index=pinecone_index)
     storage_context = StorageContext.from_defaults(vector_store=vector_store)
-
-    # create your index
     index = VectorStoreIndex.from_documents(
         documents, storage_context=storage_context
     )
 
+
+
     print('Done generating embeddings')
 
 
-def query(prompt:str, embedding_path:str) -> str:
+def query(prompt:str, index_name) -> str:
+    index_name = str(index_name)
+    pc.create_index(
+        name=index_name,
+        dimension=1024,
+        metric="euclidean",
+        spec=ServerlessSpec(cloud="aws", region='us-east-1'),
+    )
+
     model = 'llama3-8b-8192'
     llm = Groq(model=model, api_key=GROQ)
     Settings.llm = llm
@@ -106,13 +111,13 @@ def query(prompt:str, embedding_path:str) -> str:
     Settings.embed_model = embeddings
 
     # initialize client
-    db = chromadb.PersistentClient(path=embedding_path)
+    pinecone_index = pc.Index(index_name)
 
-    # get collection
-    chroma_collection = db.get_or_create_collection("quickstart")
+    vector_store = PineconeVectorStore(
+        pinecone_index=pinecone_index,
+    )
 
-    # assign chroma as the vector_store to the context
-    vector_store = ChromaVectorStore(chroma_collection=chroma_collection)
+
     storage_context = StorageContext.from_defaults(vector_store=vector_store)
 
     # load your index from stored vectors

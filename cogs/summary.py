@@ -107,7 +107,6 @@ class Summary(commands.Cog):
 
         file_name = f'all_text.txt'
         all_chat_path = os.path.join(vector_store_directory, file_name)
-        save_path = os.path.join(vector_store_directory, 'embeddings')
         temp_path = os.path.join(vector_store_directory, 'TEMP')
         temp_file = os.path.join(temp_path, 'temp.txt')
 
@@ -127,7 +126,7 @@ class Summary(commands.Cog):
                             all_chat.write('\n'+message)
                             temp.write('\n'+message)
 
-                query.generate_embeddings(save_path=save_path, documents_path=temp_path)
+                query.generate_embeddings(index_name=(ctx.guild.name.lower()).replace(' ', '-'), documents_path=temp_path)
 
                 with open(temp_file, 'w', encoding='utf-8') as f:
                     pass

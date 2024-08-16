@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 import query
 import asyncio
 from pinecone.grpc import PineconeGRPC as Pinecone
-from pinecone import ServerlessSpec
+import pinecone
 
 
 
@@ -21,14 +21,11 @@ class Querying(commands.Cog):
 
     @commands.command(name="query")
     async def question(self, ctx, *, prompt):
-        vector_store_directory = f'vectors/{ctx.guild.id}/common'
-        if str(ctx.channel.type) == "private":
-            vector_store_directory = f'vectors/{ctx.guild.id}/private/{ctx.channel.id}'
+        api_key = os.environ["PINECONE_API_KEY"]
+        pinecone.init(api_key=api_key, environment='us-east-1')
 
-        embedding_path = vector_store_directory + '/embeddings'
-
-        if os.path.exists(embedding_path):
-            response = query.query(prompt, embedding_path=embedding_path)
+        if str(ctx.author.id) in pinecone.list_indexes():
+            response = query.query(prompt, (ctx.guild.name.lower()).replace(' ', '-'))
 
             query_embed = discord.Embed(timestamp=datetime.utcnow(), title='Prompt: '+prompt,
                                               colour=0xB0B0BF, description=response)
