@@ -7,16 +7,20 @@ from llama_index.llms.groq import Groq
 import chromadb
 from llama_index.vector_stores.chroma import ChromaVectorStore
 from llama_index.core import StorageContext
-from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 from llama_index.core import Settings
-from llama_index.core.node_parser import SentenceSplitter
-from llama_index.core.extractors import TitleExtractor
-from llama_index.core.ingestion import IngestionPipeline
-import asyncio
+from pinecone import Pinecone, ServerlessSpec
+from llama_index.core import VectorStoreIndex, SimpleDirectoryReader
+from llama_index.vector_stores.pinecone import PineconeVectorStore
+from IPython.display import Markdown, display
+
 
 load_dotenv()
 GROQ = os.getenv('GROQ')
 HF_TOKEN = os.getenv('HF_TOKEN')
+PINECONE_TOKEN = os.environ['PINECONE_API']
+
+pc = Pinecone(api_key=PINECONE_TOKEN)
+
 def create_folders_and_file(folder_path, filename) ->str:
   """
   Creates folders and subfolders if they don't exist and writes content to a file in the deepest folder.
@@ -51,6 +55,13 @@ def create_folders_and_file(folder_path, filename) ->str:
 
 def generate_embeddings(documents_path:str, save_path:str)->None:
     print("Generating embeddings...")
+
+    pc.create_index(
+        name="quickstart",
+        dimension=1024,
+        metric="euclidean",
+        spec=ServerlessSpec(cloud="aws", region="us-west-2"),
+    )
 
     load_dotenv()
     HF_TOKEN = os.getenv('HF_TOKEN')
