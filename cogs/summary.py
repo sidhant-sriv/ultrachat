@@ -1,9 +1,7 @@
-from urllib import request
 from discord.ext import commands
 from discord import Embed, Colour
 import discord
 from datetime import datetime
-from llama_index.llms.groq import Groq
 from llama_index.core import get_response_synthesizer, DocumentSummaryIndex
 from llama_index.core.node_parser import SentenceSplitter
 import aiohttp
@@ -15,9 +13,7 @@ import os
 from dotenv import load_dotenv
 from llama_index.llms.groq import Groq
 import query
-import chromadb
-from llama_index.vector_stores.chroma import ChromaVectorStore
-from llama_index.core import StorageContext
+
 
 
 query_prompt = "Summarize the following Discord chat log in bullet point format, focusing on the key decisions made and the reasoning behind them. Keep the summary concise and informative."
@@ -93,20 +89,51 @@ class Summary(commands.Cog):
 
         file_directory = f'chats/{ctx.author.name}/{ctx.message.guild.name}'
         file_name = f'{ctx.message.channel.name}.txt'
-        full_path = os.path.join(file_directory, file_name)
+        chat_path = os.path.join(file_directory, file_name)
 
-        if not os.path.exists(full_path):
+        if not os.path.exists(chat_path):
             query.create_folders_and_file(file_directory, file_name)
 
-        with open(full_path, 'w', encoding='utf-8') as f:
+        with open(chat_path, 'w', encoding='utf-8') as f:
             for msg in messages:
                 if msg.author != self.bot.user:
-                    f.write(f'{msg.author.name}: {msg.content}\n')
+                    f.write(f'{msg.author.name}(id:{msg.id}): {msg.content}\n')
 
         await ctx.channel.send(f'Collected the last {num_messages} messages and saved them to {file_name}')
-        save_path = os.path.join(file_directory, 'embeddings')
-        await query.generate_embeddings(save_path=save_path, documents_path=file_directory)
-        await ctx.channel.send('Embeddings generated, ready for querying')
+
+        vector_store_directory = f'vectors/{ctx.guild.id}/common'
+        if str(ctx.channel.type) == "private":
+            vector_store_directory = f'vectors/{ctx.guild.id}/private/{ctx.channel.id}'
+
+        file_name = f'all_text.txt'
+        all_chat_path = os.path.join(vector_store_directory, file_name)
+        save_path = os.path.join(vector_store_directory, 'embeddings')
+        temp_path = os.path.join(vector_store_directory, 'TEMP')
+        temp_file = os.path.join(temp_path, 'temp.txt')
+
+        if not os.path.exists(all_chat_path):
+            query.create_folders_and_file(vector_store_directory, file_name)
+
+        if not os.path.exists(temp_file):
+            query.create_folders_and_file(temp_path, 'TEMP.txt')
+
+        with open(all_chat_path, 'a+', encoding='utf-8') as all_chat:
+            with open(chat_path, 'r', encoding='utf-8') as chat:
+                with open(temp_file, 'a+', encoding='utf-8') as temp:
+                    messages = chat.readlines()
+                    all_messages = all_chat.readlines()
+                    for message in messages:
+                        if message not in all_messages:
+                            all_chat.write('\n'+message)
+                            temp.write('\n'+message)
+
+                query.generate_embeddings(save_path=save_path, documents_path=temp_path)
+
+                with open(temp_file, 'w', encoding='utf-8') as f:
+                    pass
+
+
+
     
     async def is_authenticated(self, user_id):
         """Check if the user is authenticated."""
@@ -140,10 +167,10 @@ class Summary(commands.Cog):
         file_name = f'{ctx.message.channel.name}.txt'
         full_path = os.path.join(file_directory, file_name)
 
-        authenticated = await self.is_authenticated(ctx.author.id)
-        if not authenticated:
-            await self.send_login_prompt(ctx)
-            return
+#        authenticated = await self.is_authenticated(ctx.author.id)
+#        if not authenticated:
+#            await self.send_login_prompt(ctx)
+#            return
         if os.path.exists(file_directory):
             summary = summarize_document(full_path)
 
@@ -157,7 +184,21 @@ class Summary(commands.Cog):
                 await ctx.author.send(embed=summary_embed)
             else:
                 await ctx.channel.send(embed=summary_embed)
-#            print(f'Summary: {summary}')
+
+
+
+            file_directory = f'chats/{ctx.author.name}/{ctx.message.guild.name}/summaries'
+            file_name = f'1.txt'
+            summary_path = os.path.join(file_directory, file_name)
+
+            if os.path.exists(summary_path):
+                summary_path = query.create_folders_and_file(file_directory, next_file_name(file_directory))
+            else:
+                summary_path = query.create_folders_and_file(file_directory, '1.txt')
+
+            with open(summary_path, 'w', encoding='utf-8') as f:
+                f.write(str(summary))
+
 
         else:
             await ctx.channel.send(
@@ -175,6 +216,12 @@ class Summary(commands.Cog):
 
 
 
+
+
+def next_file_name(path:str):
+    files = map(int, [x[:-4] for x in os.listdir(path)])
+    name = str(max(files)+1)
+    return name+'.txt'
 
 async def setup(bot):
     await bot.add_cog(Summary(bot))
