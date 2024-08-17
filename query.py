@@ -13,13 +13,13 @@ from llama_index.core import VectorStoreIndex, SimpleDirectoryReader
 from llama_index.vector_stores.pinecone import PineconeVectorStore
 from IPython.display import Markdown, display
 
-
+#Load Tokens
 load_dotenv()
 GROQ = os.getenv('GROQ')
 HF_TOKEN = os.getenv('HF_TOKEN')
-PINECONE_TOKEN = os.environ['PINECONE_API']
 
-pc = Pinecone(api_key=PINECONE_TOKEN)
+
+
 
 def create_folders_and_file(folder_path, filename) ->str:
   """
@@ -54,14 +54,15 @@ def create_folders_and_file(folder_path, filename) ->str:
 
 
 def generate_embeddings(documents_path:str, save_path:str)->None:
+    """
+    Generates embeddings for files present in a given folder and stores those vectors in a chroma vector store
+    at a given folder
+    args:
+        documents_path (str): Path to the folders containing contextual data
+        save_path (str): Path to the folder where the embeddings will be stored (in a folder named embeddings)
+    """
     print("Generating embeddings...")
 
-    pc.create_index(
-        name="quickstart",
-        dimension=1024,
-        metric="euclidean",
-        spec=ServerlessSpec(cloud="aws", region="us-west-2"),
-    )
 
     load_dotenv()
     HF_TOKEN = os.getenv('HF_TOKEN')
@@ -73,14 +74,13 @@ def generate_embeddings(documents_path:str, save_path:str)->None:
     embed_model = LangchainEmbedding(embeddings)
     Settings.embed_model = embeddings
 
-#    Settings.embed_model = HuggingFaceEmbedding(
-#    model_name = 'nomic-ai/nomic-embed-text-v1'
-#    )
-
+    #Document reader
     documents = SimpleDirectoryReader(documents_path).load_data()
     db = chromadb.PersistentClient(path=save_path)
+
     # create collection
     chroma_collection = db.get_or_create_collection("quickstart")
+
 
     vector_store = ChromaVectorStore(chroma_collection=chroma_collection)
     storage_context = StorageContext.from_defaults(vector_store=vector_store)
@@ -94,6 +94,14 @@ def generate_embeddings(documents_path:str, save_path:str)->None:
 
 
 def query(prompt:str, embedding_path:str) -> str:
+    """
+    Rag query agent that uses context from a vector store to respond to a prompt
+    args:
+        prompt (str): Prompt to the llm
+        embedding_path (str): Path to the chroma vector store to use as context to the prompt
+    """
+
+    #Initialising the llm model instance
     model = 'llama3-8b-8192'
     llm = Groq(model=model, api_key=GROQ)
     Settings.llm = llm
@@ -119,6 +127,8 @@ def query(prompt:str, embedding_path:str) -> str:
     index = VectorStoreIndex.from_vector_store(
         vector_store, storage_context=storage_context
     )
+
+    #Rag query agent and querying
     query_engine = index.as_query_engine()
     response = query_engine.query(prompt)
     return response

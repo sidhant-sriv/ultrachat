@@ -6,30 +6,44 @@ from dotenv import load_dotenv
 import query
 import asyncio
 from pinecone.grpc import PineconeGRPC as Pinecone
-from pinecone import ServerlessSpec
 
 
 
 load_dotenv()
 thumbnail = os.getenv('EMBED_THUMBNAIL')
-pc = Pinecone(api_key=os.getenv('PINECONE_API'))
 
 class Querying(commands.Cog):
+    """Discord Cog to handle all querying related commands"""
     def __init__(self, bot):
         self.bot = bot
 
 
     @commands.command(name="query")
-    async def question(self, ctx, *, prompt):
+    async def question(self, ctx, *, prompt:str):
+        """
+        Command: query (!query in chat) followed by the prompt
+        Function: After using the collect command, a central vector store will be generated for the specific discord server,
+        this command will use that vector store as context and respond to the given prompt
+        args:
+            ctx (discord.ext.commands.Context): Discord context
+            prompt (str): Prompt from the user
+        """
+
+        #general vector store directory
         vector_store_directory = f'vectors/{ctx.guild.id}/common'
+
+        #accesses the private vector store for specific private channels in given discord server
         if str(ctx.channel.type) == "private":
             vector_store_directory = f'vectors/{ctx.guild.id}/private/{ctx.channel.id}'
 
+        #vector store path
         embedding_path = vector_store_directory + '/embeddings'
 
+        #queries if context (vector store) exists
         if os.path.exists(embedding_path):
             response = query.query(prompt, embedding_path=embedding_path)
 
+            #Generating discord embed as response to the query
             query_embed = discord.Embed(timestamp=datetime.utcnow(), title='Prompt: '+prompt,
                                               colour=0xB0B0BF, description=response)
             query_embed.set_author(name='UltraChat')
@@ -38,6 +52,7 @@ class Querying(commands.Cog):
 
             await ctx.channel.send(embed=query_embed)
         else:
+            #handles case if no context is found
             await ctx.channel.send('No context found, use the collect command first')
 
 

@@ -14,6 +14,7 @@ TOKEN: Final[str] = os.getenv('DISCORD_TOKEN')
 intents: Intents = Intents.all()
 intents.message_content = True  # NOQA
 bot = commands.Bot(command_prefix='!', intents=intents)
+
 EXCLUDED_FILES = ['music.py', 'summarise.py'] #files that might be in the cogs folder but need not to be loaded
 EXCLUDED_COMMANDS = ['help']
 
@@ -26,6 +27,8 @@ for i in EXCLUDED_COMMANDS:
 @bot.event
 async def on_ready() -> None:
     print(f'{bot.user} is now running!')
+
+    #Syncing slash commands
     try:
         synced = await bot.tree.sync()
         print(f"Synced {len(synced)} commands")
