@@ -1,6 +1,6 @@
 from typing import Final
 from dotenv import load_dotenv
-from discord import Intents, Client, Message
+from discord import Intents
 from discord.ext import commands
 
 import os
