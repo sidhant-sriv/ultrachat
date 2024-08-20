@@ -1,6 +1,5 @@
 from llama_index.core import Settings, SimpleDirectoryReader, VectorStoreIndex
 from langchain_community.embeddings import HuggingFaceInferenceAPIEmbeddings
-from llama_index.embeddings.langchain import LangchainEmbedding
 import os
 from dotenv import load_dotenv
 from llama_index.llms.groq import Groq
@@ -8,10 +7,7 @@ import chromadb
 from llama_index.vector_stores.chroma import ChromaVectorStore
 from llama_index.core import StorageContext
 from llama_index.core import Settings
-from pinecone import Pinecone, ServerlessSpec
 from llama_index.core import VectorStoreIndex, SimpleDirectoryReader
-from llama_index.vector_stores.pinecone import PineconeVectorStore
-from IPython.display import Markdown, display
 
 #Load Tokens
 load_dotenv()
@@ -71,7 +67,6 @@ def generate_embeddings(documents_path:str, save_path:str)->None:
     embeddings = HuggingFaceInferenceAPIEmbeddings(
         api_key=HF_TOKEN, model_name="BAAI/bge-large-en-v1.5"
     )
-    embed_model = LangchainEmbedding(embeddings)
     Settings.embed_model = embeddings
 
     #Document reader
@@ -110,7 +105,6 @@ def query(prompt:str, embedding_path:str) -> str:
     embeddings = HuggingFaceInferenceAPIEmbeddings(
         api_key=HF_TOKEN, model_name="BAAI/bge-large-en-v1.5"
     )
-    embed_model = LangchainEmbedding(embeddings)
     Settings.embed_model = embeddings
 
     # initialize client
