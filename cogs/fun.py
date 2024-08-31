@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 import random
 from textblob import TextBlob
-from dotenv import load_dotenv, find_dotenv
+from dotenv import load_dotenv
 load_dotenv('.env')
 
 

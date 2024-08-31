@@ -4,9 +4,6 @@ from datetime import datetime
 import os
 from dotenv import load_dotenv
 import query
-import asyncio
-from pinecone.grpc import PineconeGRPC as Pinecone
-
 
 
 load_dotenv()

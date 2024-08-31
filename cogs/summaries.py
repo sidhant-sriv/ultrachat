@@ -1,6 +1,4 @@
 import os.path
-import pathlib
-
 import discord
 from discord.ext import commands
 from datetime import datetime
