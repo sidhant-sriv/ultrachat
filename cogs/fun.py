@@ -1,12 +1,8 @@
 import discord
-import os
-import imgurpython
-import requests
 from discord.ext import commands
 import random
-import praw
 from textblob import TextBlob
-from dotenv import load_dotenv, find_dotenv
+from dotenv import load_dotenv
 load_dotenv('.env')
 
 

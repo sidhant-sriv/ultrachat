@@ -1,6 +1,5 @@
 import discord as discord
 from discord.ext import commands
-from googlesearch import search
 import wikipedia
 
 
