@@ -167,10 +167,10 @@ class Summary(commands.Cog):
         file_name = f'{ctx.message.channel.name}.txt'
         full_path = os.path.join(file_directory, file_name)
 
-#        authenticated = await self.is_authenticated(ctx.author.id)
-#        if not authenticated:
-#            await self.send_login_prompt(ctx)
-#            return
+        authenticated = await self.is_authenticated(ctx.author.id)
+        if not authenticated:
+            await self.send_login_prompt(ctx)
+            return
         if os.path.exists(file_directory):
             summary = summarize_document(full_path)
 
