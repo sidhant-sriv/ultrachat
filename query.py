@@ -1,4 +1,4 @@
-from llama_index.core import Settings, SimpleDirectoryReader, VectorStoreIndex
+
 from langchain_community.embeddings import HuggingFaceInferenceAPIEmbeddings
 from llama_index.embeddings.langchain import LangchainEmbedding
 import os
