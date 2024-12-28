@@ -25,6 +25,7 @@ def create_folders_and_file(folder_path, filename) ->str:
       filename (str): Name of the file to create in the deepest folder.
       content (str, optional): Content to write to the file. Defaults to "This is some text".
   """
+
   # Ensure path is a string
   if not isinstance(folder_path, str):
     raise TypeError("folder_path must be a string")
