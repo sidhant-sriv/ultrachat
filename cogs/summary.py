@@ -13,6 +13,8 @@ import os
 from dotenv import load_dotenv
 from llama_index.llms.groq import Groq
 import query
+from cogs import summaries
+from database import *
 
 
 
@@ -81,6 +83,9 @@ class Summary(commands.Cog):
         except (IndexError, ValueError):
             num_messages = 10
 
+        if num_messages>700:
+            num_messages = 700
+
         messages = []
         async for msg in ctx.channel.history(limit=num_messages):
             messages.append(msg)
@@ -144,16 +149,17 @@ class Summary(commands.Cog):
             async with session.get(url, headers=headers) as response:
                 return response.status == 200
 
+    @commands.command(name="login")
     async def send_login_prompt(self, ctx):
         """Send a login prompt to the user."""
         login_embed = Embed(
-            title="Authentication Required",
-            description="Please login to access this feature.",
+            title="UltraChat Login",
+            description="Please login to store summaries for later",
             colour=Colour.red()
         )
-        login_embed.set_footer(text="Click the button below to login.")
+        login_embed.set_footer(text="Click the link above to login.")
 
-        login_url = "https://discord.com/oauth2/authorize?client_id=1256967412943949904&redirect_uri=https://ultra-chat-backend.onrender.com/callback&response_type=code&scope=identify%20email"
+        login_url = "https://discord.com/api/oauth2/authorize?client_id=1256967412943949904\u0026redirect_uri=https://ultra-achat-go-backend.onrender.com/callback\u0026response_type=code\u0026scope=identify%20email"
         login_embed_url = f"{login_url}"
         login_embed.add_field(name="Login", value=f"[Login Here]({login_embed_url})")
 
@@ -167,10 +173,8 @@ class Summary(commands.Cog):
         file_name = f'{ctx.message.channel.name}.txt'
         full_path = os.path.join(file_directory, file_name)
 
-        authenticated = await self.is_authenticated(ctx.author.id)
-        if not authenticated:
-            await self.send_login_prompt(ctx)
-            return
+
+
         if os.path.exists(file_directory):
             summary = summarize_document(full_path)
 
@@ -180,6 +184,23 @@ class Summary(commands.Cog):
             summary_embed.set_thumbnail(url=thumbnail)
             summary_embed.set_footer(text="UltraChat by GDSC")
 
+            data = {
+                "content": str(summary),
+                "server_id": str(ctx.message.guild.id),
+                "is_private": True if str(ctx.message.type) == 'private' else False,
+                "user_id": str(ctx.author.id)
+            }
+            response = create_summary(data)
+
+            if str(response.status_code) == '201':
+                summary_embed.add_field(name="Summary saved", value=f"your summary has been saved successfully")
+
+
+            else:
+                login_url = "https://discord.com/api/oauth2/authorize?client_id=1256967412943949904\u0026redirect_uri=https://ultra-achat-go-backend.onrender.com/callback\u0026response_type=code\u0026scope=identify%20email"
+                login_embed_url = f"{login_url}"
+                summary.add_field(name="Login to save summaries", value=f"[Login Here]({login_embed_url})")
+
             if priv in ['p', 'priv', 'private', 'dm']:
                 await ctx.author.send(embed=summary_embed)
             else:
@@ -187,41 +208,18 @@ class Summary(commands.Cog):
 
 
 
-            file_directory = f'chats/{ctx.author.name}/{ctx.message.guild.name}/summaries'
-            file_name = f'1.txt'
-            summary_path = os.path.join(file_directory, file_name)
-
-            if os.path.exists(summary_path):
-                summary_path = query.create_folders_and_file(file_directory, next_file_name(file_directory))
-            else:
-                summary_path = query.create_folders_and_file(file_directory, '1.txt')
-
-            with open(summary_path, 'w', encoding='utf-8') as f:
-                f.write(str(summary))
 
 
         else:
             await ctx.channel.send(
                 f'No collected messages found for {ctx.author.name}. Please use the !collect command first.')
 
-        url = "https://ultra-chat-backend.onrender.com/is_authenticated"
-        headers = {'ID': str(ctx.author.id)}  
-    
-        async with aiohttp.ClientSession() as session:
-            async with session.get(url, headers=headers) as response:
-                response_json = await response.json()
-            # Logging response
-                print(f"Response status code: {response.status}")
-                print(f"Response data: {response_json}")
 
 
 
 
 
-def next_file_name(path:str):
-    files = map(int, [x[:-4] for x in os.listdir(path)])
-    name = str(max(files)+1)
-    return name+'.txt'
+
 
 async def setup(bot):
     await bot.add_cog(Summary(bot))
