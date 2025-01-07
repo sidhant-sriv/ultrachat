@@ -6,7 +6,16 @@ dotenv.load_dotenv()
 
 
 
-def create_summary(data):
+def create_summary(data:dict):
+    '''
+    data : {
+                "content": str(summary),
+                "server_id": str(ctx.message.guild.id),
+                "is_private": True if str(ctx.message.type) == 'private' else False,
+                "user_id": str(ctx.author.id)
+            }
+    stores this data using mongodb on backend server
+    '''
     print("sending data to server")
     url = os.getenv("CREATE_SUMMARY_URL")
     headers = {"Content-Type": "application/json"}
@@ -17,6 +26,9 @@ def create_summary(data):
 
 
 def get_summaries(id, server_id):
+    '''
+
+    '''
     print("getting summaries")
     url = os.getenv("GET_SUMMARY_URL")
     headers = {"ID": str(id)}

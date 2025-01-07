@@ -159,7 +159,7 @@ class Summary(commands.Cog):
         )
         login_embed.set_footer(text="Click the link above to login.")
 
-        login_url = "https://discord.com/api/oauth2/authorize?client_id=1256967412943949904\u0026redirect_uri=https://ultra-achat-go-backend.onrender.com/callback\u0026response_type=code\u0026scope=identify%20email"
+        login_url = os.getenv("LOGIN_URL")
         login_embed_url = f"{login_url}"
         login_embed.add_field(name="Login", value=f"[Login Here]({login_embed_url})")
 

@@ -138,26 +138,7 @@ class Summaries(commands.Cog):
             await ctx.author.send(embed = pages[num-1],
                             view=SummariesView(pages=pages, num=num, summary_ids=summary_ids, id = ctx.author.id))
 
-    '''@commands.command(name="summary_clear")
-    async def summary_clear(self,ctx, start: int =0, stop = None):
-        start = int(start)
-        stop = int(stop) if stop is not None else None
-        summary_folder = f'chats/{ctx.author.name}/{ctx.message.guild.name}/summaries'
-        if (start>stop) and (start>0 and stop<len(os.listdir(summary_folder))):
-            if stop is not None:
-                for filename in os.listdir(summary_folder)[start-1:stop-1]:
-                    summary = os.path.join(summary_folder, filename)
-                    os.remove(summary)
 
-        if stop is None and start > 0:
-            os.remove(os.path.join(summary_folder, f"{start}.txt"))
-
-        i = 1
-        for filename in os.listdir(summary_folder):
-            old_summary = os.path.join(summary_folder, filename)
-            new_summary = os.path.join(summary_folder, f"{i}.txt")
-            os.rename(old_summary, new_summary)
-            i += 1'''
 
 
 
