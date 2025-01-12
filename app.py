@@ -16,6 +16,13 @@ intents.message_content = True  # NOQA
 bot = commands.Bot(command_prefix='!', intents=intents)
 
 
+EXCLUDED_COMMANDS = ['help']
+
+#Removing default commands
+for i in EXCLUDED_COMMANDS:
+    bot.remove_command(i)
+
+
 # STEP 2: HANDLING THE STARTUP FOR OUR BOT
 @bot.event
 async def on_ready() -> None:

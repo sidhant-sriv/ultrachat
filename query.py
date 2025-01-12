@@ -7,13 +7,16 @@ from llama_index.vector_stores.chroma import ChromaVectorStore
 from llama_index.core import StorageContext
 from llama_index.core import Settings
 from llama_index.core import VectorStoreIndex, SimpleDirectoryReader
+from llama_index.embeddings.cohere import CohereEmbedding
 
 #Load Tokens
 load_dotenv()
 GROQ = os.getenv('GROQ')
 HF_TOKEN = os.getenv('HF_TOKEN')
+cohere_api_key = os.getenv('COHERE_API_KEY')
 
 
+llm_model = "llama-3.1-8b-instant"
 
 
 def create_folders_and_file(folder_path, filename) ->str:
@@ -60,12 +63,11 @@ def generate_embeddings(documents_path:str, save_path:str)->None:
     print("Generating embeddings...")
 
 
-    load_dotenv()
-    HF_TOKEN = os.getenv('HF_TOKEN')
-
     # Initialize embeddings
-    embeddings = HuggingFaceInferenceAPIEmbeddings(
-        api_key=HF_TOKEN, model_name="BAAI/bge-large-en-v1.5"
+    embeddings = CohereEmbedding(
+        api_key=cohere_api_key,
+        model_name="embed-english-light-v3.0",
+        input_type="search_query",
     )
     Settings.embed_model = embeddings
 
@@ -97,13 +99,14 @@ def query(prompt:str, embedding_path:str) -> str:
     """
 
     #Initialising the llm model instance
-    model = 'llama3-8b-8192'
-    llm = Groq(model=model, api_key=GROQ)
+    llm = Groq(model=llm_model, api_key=GROQ)
     Settings.llm = llm
 
-    # Initialize embeddings
-    embeddings = HuggingFaceInferenceAPIEmbeddings(
-        api_key=HF_TOKEN, model_name="BAAI/bge-large-en-v1.5"
+    #Initialise Embeddings
+    embeddings = CohereEmbedding(
+        api_key=cohere_api_key,
+        model_name="embed-english-light-v3.0",
+        input_type="search_query",
     )
     Settings.embed_model = embeddings
 

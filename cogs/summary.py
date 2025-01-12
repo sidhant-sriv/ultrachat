@@ -13,35 +13,49 @@ import os
 from dotenv import load_dotenv
 from llama_index.llms.groq import Groq
 import query
-from cogs import summaries
+from llama_index.embeddings.cohere import CohereEmbedding
 from database import *
+from llama_index.core import PromptTemplate
+import time
 
 
-
-query_prompt = "Summarize the following Discord chat log in bullet point format, focusing on the key decisions made and the reasoning behind them. Keep the summary concise and informative."
 thumbnail = os.getenv("EMBED_THUMBNAIL")
-def summarize_document(file_name='message_history.txt', query=query_prompt):
+def summarize_document(file_name='message_history.txt'):
     # Apply nest_asyncio
     nest_asyncio.apply()
 
     # Load environment variables
     load_dotenv()
     GROQ = os.getenv('GROQ')
-    HF_TOKEN = os.getenv('HF_TOKEN')
+    cohere_api_key = os.getenv('COHERE_API_KEY')
 
     if not GROQ:
         raise ValueError("Missing GROQ API key in environment variables.")
 
+    qa_prompt_tmpl = (
+        "Context information is below.\n"
+        "---------------------\n"
+        "{context_str}\n"
+        "---------------------\n"
+        "Given the context information and not prior knowledge, "
+        "answer the query.\n"
+        "Query: {query_str}\n"
+        "Answer: "
+    )
+    qa_prompt = PromptTemplate(qa_prompt_tmpl)
+
     # Initialize the LLM
-    model = 'llama3-8b-8192'
+    model = 'llama-3.1-8b-instant'
     llm = Groq(model=model, api_key=GROQ)
     Settings.llm = llm
 
     # Initialize embeddings
-    embeddings = HuggingFaceInferenceAPIEmbeddings(
-        api_key=HF_TOKEN, model_name="BAAI/bge-large-en-v1.5"
+    embeddings = CohereEmbedding(
+        api_key=cohere_api_key,
+        model_name="embed-english-light-v3.0",
+        input_type="search_query",
     )
-    embed_model = LangchainEmbedding(embeddings)
+
     Settings.embed_model = embeddings
 
     # Load the document
@@ -51,7 +65,7 @@ def summarize_document(file_name='message_history.txt', query=query_prompt):
 
     # Initialize response synthesizer and splitter
     response_synthesizer = get_response_synthesizer(response_mode="tree_summarize", use_async=True)
-    splitter = SentenceSplitter(chunk_size=1024)
+    splitter = SentenceSplitter(chunk_size=512, chunk_overlap=10)
 
     # Create the document summary index
     doc_summary_index = DocumentSummaryIndex.from_documents(
@@ -59,10 +73,12 @@ def summarize_document(file_name='message_history.txt', query=query_prompt):
         llm=llm,
         transformations=[splitter],
         response_synthesizer=response_synthesizer,
+        show_progress=True
     )
 
     # Create the query engine
-    query_engine = doc_summary_index.as_query_engine(response_mode="tree_summarize", use_async=True)
+    query_engine = doc_summary_index.as_query_engine(response_mode="tree_summarize", use_async=True, verbose=True, summary_template = qa_prompt)
+
 
     # Return the query result
     return query_engine.query(query)
@@ -83,8 +99,7 @@ class Summary(commands.Cog):
         except (IndexError, ValueError):
             num_messages = 10
 
-        if num_messages>700:
-            num_messages = 700
+
 
         messages = []
         async for msg in ctx.channel.history(limit=num_messages):
@@ -168,6 +183,7 @@ class Summary(commands.Cog):
 
     @commands.command(name="summary")
     async def summary(self, ctx, priv=None):
+        start_end = time.time()
         """provides a summary of a given chat log saved by the collect command"""
         file_directory = f'chats/{ctx.author.name}/{ctx.message.guild.name}'
         file_name = f'{ctx.message.channel.name}.txt'
@@ -192,14 +208,16 @@ class Summary(commands.Cog):
             }
             response = create_summary(data)
 
+            end_time = time.time()
             if str(response.status_code) == '201':
-                summary_embed.add_field(name="Summary saved", value=f"your summary has been saved successfully")
+                summary_embed.add_field(name=f"Summary saved (in {(end_time-start_end):.2f} sec)", value=f"your summary has been saved successfully")
 
 
             else:
                 login_url = "https://discord.com/api/oauth2/authorize?client_id=1256967412943949904\u0026redirect_uri=https://ultra-achat-go-backend.onrender.com/callback\u0026response_type=code\u0026scope=identify%20email"
                 login_embed_url = f"{login_url}"
                 summary.add_field(name="Login to save summaries", value=f"[Login Here]({login_embed_url})")
+
 
             if priv in ['p', 'priv', 'private', 'dm']:
                 await ctx.author.send(embed=summary_embed)
