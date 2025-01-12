@@ -35,6 +35,7 @@ class SummariesView(discord.ui.View):
     class that handles the View of the summaries along with the functionalities of the buttons
     subclass of discord.ui.View
     """
+
     def __init__(self, pages:list, num:int, summary_ids, id):
         super().__init__()
         self.pages = pages
