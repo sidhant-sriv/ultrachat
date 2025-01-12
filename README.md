@@ -5,26 +5,34 @@
 
 #### A Discord bot to supercharge your productivity in servers
 
-
+[](https://github.com/GDGVIT/template#--insert-project-description-here--)
+This repository contains the the code for the the discord bot Ultra-Chat. 
 
 # Installation and running UltraChat
 ---
-You need to have Python installed along with a developer account on discord. Visit their developer's portal and create a bot application and get it's token.
+You need to have Python installed along with a developer account on discord. Visit their developer's portal and create a bot application and get it's token. Clone the repository using 
+- `git clone https://github.com/GDGVIT/UltraChat.git` 
+- `cd ultrachat`
 
 1. check .env.example and get all the required api keys 
 	- [HuggingFace api](https://huggingface.co/settings/tokens)
 	- [Groq api](https://console.groq.com/keys)
 	- [Discord api](https://discord.com/developers/applications)
+	- [Cohere api](https://dashboard.cohere.com/api-keys)
 
 2. Host Ultra-chat-backend and provide the respective endpoints
 
 3. Remove the .example from the end of the filename, and this will contain all client secrets for your projects
  
-4. It is recommended to create a python virtual environment using 
+4. It is recommended to create a python virtual environment 
+- Windows
  ```shell
  python -m venv venv
  .\venv\Scripts\activate
- 
+```
+- Linux and MacOS
+```shell
+source myenv/bin/activate
 ```
 
 5. Install the project dependencies using (It is recommended to use python >=3.10)
@@ -36,7 +44,7 @@ pip3 install requirements.txt
 ```shell
 python app.py
 ```
-## Run using Docker
+# Run using Docker
 
 1. Install Docker
 
@@ -44,6 +52,7 @@ python app.py
 
 3. Run the command
 ```shell
+docker-compose build
 docker-compose up
 ```
 

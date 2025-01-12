@@ -1,6 +1,8 @@
 services:
   discord-bot:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
     image: UltraChat:base
     env_file:
       - .env
@@ -9,12 +11,13 @@ services:
       - ./chats:/usr/src/app/chats
 
   discord-bot-backend:
-    ports:
-      - 5001:5001
     build:
-      - ./ultra-chat-backend
+      context: ./ultra-chat-backend
+      dockerfile: Dockerfile
+    image: UltraChat:backend
     env_file:
-      - ./ultra-chat-backend/.env
+      - ./ultrachat-backend/.env
+    ports:
+      - "5001:5001"
     depends_on:
-      - UltraChat:base
-
+      - discord-bot

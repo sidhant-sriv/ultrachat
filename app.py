@@ -15,17 +15,9 @@ intents: Intents = Intents.all()
 intents.message_content = True  # NOQA
 bot = commands.Bot(command_prefix='!', intents=intents)
 
-EXCLUDED_FILES = ['music.py', 'summarise.py'] #files that might be in the cogs folder but need not to be loaded
-EXCLUDED_COMMANDS = ['help']
 
 #Removing default commands
-for i in EXCLUDED_COMMANDS:
-    bot.remove_command(i)
-
-
 EXCLUDED_COMMANDS = ['help']
-
-#Removing default commands
 for i in EXCLUDED_COMMANDS:
     bot.remove_command(i)
 
@@ -54,7 +46,7 @@ async def commands(ctx):
 async def load() -> None:
     """loads cogs present in .\\cogs"""
     for filename in os.listdir("./cogs"):
-        if filename.endswith(".py") and filename not in EXCLUDED_FILES:
+        if filename.endswith(".py"):
             await bot.load_extension(f'cogs.{filename[:-3]}')
 
 
