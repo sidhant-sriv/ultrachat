@@ -33,8 +33,8 @@ pip3 install requirements.txt
 
 ```
 6. Run the main script
-	```shell
-	python app.py
+```shell
+python app.py
 ```
 ## Run using Docker
 
