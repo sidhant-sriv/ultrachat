@@ -64,10 +64,12 @@ def generate_embeddings(documents_path:str, save_path:str)->None:
 
 
     # Initialize embeddings
+
     embeddings = CohereEmbedding(
         api_key=cohere_api_key,
         model_name="embed-english-light-v3.0",
         input_type="search_query",
+
     )
     Settings.embed_model = embeddings
 
@@ -78,11 +80,12 @@ def generate_embeddings(documents_path:str, save_path:str)->None:
     # create collection
     chroma_collection = db.get_or_create_collection("quickstart")
 
-
+    #TODO: Switch from Chroma to Weaviate or SupaBase
     vector_store = ChromaVectorStore(chroma_collection=chroma_collection)
     storage_context = StorageContext.from_defaults(vector_store=vector_store)
 
     # create your index
+    #TODO: USE cache backed embeddings
     index = VectorStoreIndex.from_documents(
         documents, storage_context=storage_context
     )
@@ -125,6 +128,7 @@ def query(prompt:str, embedding_path:str) -> str:
         vector_store, storage_context=storage_context
     )
 
+    #TODO: create a prompt template
     #Rag query agent and querying
     query_engine = index.as_query_engine()
     response = query_engine.query(prompt)

@@ -5,6 +5,7 @@ from discord.ext import commands
 
 thumbnail = os.getenv('EMBED_THUMBNAIL')
 
+#contains all the fields for the !help command
 help_text = {
     'help': 'Lists all available commands and their description',
     'base64_e': 'Encodes a given message in base64 format',
@@ -28,6 +29,7 @@ help_text = {
     'login': 'Provides the login link'
 }
 
+#contains descriptions for each command
 command_args = {
     'help': '!help / !help <command name>',
     'base64_e': '!base64_e <text message>',
@@ -59,6 +61,11 @@ class Help(commands.Cog):
 
     @commands.command(name ='help')
     async def help(self, ctx, command=None):
+        '''
+        command (Optional: str): command present in bot
+        generates help embed for the discord bot
+        '''
+
         if command:
             # Provide help for a specific command
             command_obj = self.bot.get_command(command)

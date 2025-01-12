@@ -4,7 +4,7 @@ import base64
 
 
 class CaeserCipher:
-
+    #encrypts and decrypts using caeser cypher
     def encrypt(self, text, key=3):
         result = ""
         for i in text:
@@ -29,6 +29,7 @@ class CaeserCipher:
 
 
 class SHA256:
+    #encrypts using SHA256
     def __init__(self, text):
         self.text = text
         self.hash = hashlib.sha256(text.encode('utf-8')).hexdigest()
@@ -41,6 +42,7 @@ class SHA256:
 
 
 class MD5:
+    #encrypts using MD5
     def __init__(self, text):
         self.text = text
         self.hash = hashlib.md5(text.encode('utf-8')).hexdigest()

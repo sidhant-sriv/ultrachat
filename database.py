@@ -27,8 +27,10 @@ def create_summary(data:dict):
 
 def get_summaries(id, server_id):
     '''
-
+        id:str = ctx.author.id
+        server_id:str = ctx.guild.id
     '''
+
     print("getting summaries")
     url = os.getenv("GET_SUMMARY_URL")
     headers = {"ID": str(id)}
@@ -39,6 +41,15 @@ def get_summaries(id, server_id):
     return response
 
 def update_summary(data):
+    '''
+            data : {
+                "content": str(summary),
+                "server_id": str(ctx.message.guild.id),
+                "is_private": True if str(ctx.message.type) == 'private' else False,
+                "user_id": str(ctx.author.id)
+            }
+    updates data on backend server
+    '''
     url = os.getenv("UPDATE_SUMMARY_URL")
     headers = {"Content-Type": "application/json"}
     response = requests.put(url, headers=headers, json=data)

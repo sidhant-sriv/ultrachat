@@ -19,7 +19,12 @@ from llama_index.core import PromptTemplate
 import time
 
 
+
+
 thumbnail = os.getenv("EMBED_THUMBNAIL")
+
+#TODO: cycle through API Keys
+#TODO: Convert function to async
 def summarize_document(file_name='message_history.txt'):
     # Apply nest_asyncio
     nest_asyncio.apply()
@@ -64,6 +69,7 @@ def summarize_document(file_name='message_history.txt'):
     docs[0].doc_id = file_name
 
     # Initialize response synthesizer and splitter
+    #TODO: check for a better method to generate summary
     response_synthesizer = get_response_synthesizer(response_mode="tree_summarize", use_async=True)
     splitter = SentenceSplitter(chunk_size=512, chunk_overlap=10)
 
