@@ -8,12 +8,16 @@ from llama_index.core import StorageContext
 from llama_index.core import Settings
 from llama_index.core import VectorStoreIndex, SimpleDirectoryReader
 from llama_index.embeddings.cohere import CohereEmbedding
+import pymongo
+from llama_index.vector_stores.mongodb import MongoDBAtlasVectorSearch
+import uuid
 
 #Load Tokens
 load_dotenv()
 GROQ = os.getenv('GROQ')
 HF_TOKEN = os.getenv('HF_TOKEN')
 cohere_api_key = os.getenv('COHERE_API_KEY')
+mongo_uri = os.getenv('mongo_uri')
 
 
 llm_model = "llama-3.1-8b-instant"
@@ -52,13 +56,13 @@ def create_folders_and_file(folder_path, filename) ->str:
 
 
 
-def generate_embeddings(documents_path:str, save_path:str)->None:
+def generate_embeddings(documents_path:str, server, channel)->None:
     """
     Generates embeddings for files present in a given folder and stores those vectors in a chroma vector store
     at a given folder
     args:
         documents_path (str): Path to the folders containing contextual data
-        save_path (str): Path to the folder where the embeddings will be stored (in a folder named embeddings)
+
     """
     print("Generating embeddings...")
 
@@ -69,22 +73,26 @@ def generate_embeddings(documents_path:str, save_path:str)->None:
         api_key=cohere_api_key,
         model_name="embed-english-light-v3.0",
         input_type="search_query",
-
     )
     Settings.embed_model = embeddings
 
     #Document reader
     documents = SimpleDirectoryReader(documents_path).load_data()
-    db = chromadb.PersistentClient(path=save_path)
+    for document in documents:
+        document.metadata = {"server": int(server), "channel": str(channel)}
 
-    # create collection
-    chroma_collection = db.get_or_create_collection("quickstart")
+    print(documents[0].metadata)
 
-    #TODO: Switch from Chroma to Weaviate or SupaBase
-    vector_store = ChromaVectorStore(chroma_collection=chroma_collection)
-    storage_context = StorageContext.from_defaults(vector_store=vector_store)
+    mongodb_client = pymongo.MongoClient(mongo_uri)
+    store = MongoDBAtlasVectorSearch(mongodb_client, db_name = "UltraChat", collection_name=str(server), id_key=str(uuid.uuid4()))
 
-    # create your index
+    store.create_vector_search_index(
+        dimensions=384, path="embedding", similarity="cosine"
+    )
+
+
+    storage_context = StorageContext.from_defaults(vector_store=store)
+
     #TODO: USE cache backed embeddings
     index = VectorStoreIndex.from_documents(
         documents, storage_context=storage_context
@@ -93,7 +101,7 @@ def generate_embeddings(documents_path:str, save_path:str)->None:
     print('Done generating embeddings')
 
 
-def query(prompt:str, embedding_path:str) -> str:
+def query(prompt:str, server) -> str:
     """
     Rag query agent that uses context from a vector store to respond to a prompt
     args:
@@ -111,25 +119,23 @@ def query(prompt:str, embedding_path:str) -> str:
         model_name="embed-english-light-v3.0",
         input_type="search_query",
     )
+
     Settings.embed_model = embeddings
 
-    # initialize client
-    db = chromadb.PersistentClient(path=embedding_path)
+    mongodb_client = pymongo.MongoClient(mongo_uri)
+    store = MongoDBAtlasVectorSearch(mongodb_client, db_name = "UltraChat", collection_name=str(server))
 
-    # get collection
-    chroma_collection = db.get_or_create_collection("quickstart")
+    storage_context = StorageContext.from_defaults(vector_store=store)
 
-    # assign chroma as the vector_store to the context
-    vector_store = ChromaVectorStore(chroma_collection=chroma_collection)
-    storage_context = StorageContext.from_defaults(vector_store=vector_store)
-
-    # load your index from stored vectors
+    # TODO: USE cache backed embeddings
     index = VectorStoreIndex.from_vector_store(
-        vector_store, storage_context=storage_context
+        vector_store=store, storage_context=storage_context
     )
+
 
     #TODO: create a prompt template
     #Rag query agent and querying
     query_engine = index.as_query_engine()
     response = query_engine.query(prompt)
+
     return response
