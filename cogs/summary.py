@@ -105,6 +105,9 @@ class Summary(commands.Cog):
         except (IndexError, ValueError):
             num_messages = 10
 
+        if num_messages > 1000:
+            num_messages = 1000
+
 
 
         messages = []
