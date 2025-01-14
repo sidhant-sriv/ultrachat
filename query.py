@@ -105,14 +105,14 @@ def generate_embeddings(documents_path:str, server, channel)->None:
     print('Done generating embeddings')
 
 
-def query(prompt:str, server) -> str:
+def query(prompt:str, server, channel) -> str:
     """
     Rag query agent that uses context from a vector store to respond to a prompt
     args:
         prompt (str): Prompt to the llm
         embedding_path (str): Path to the chroma vector store to use as context to the prompt
     """
-
+    print("Query: "+prompt)
     #Initialising the llm model instance
     llm = Groq(model=llm_model, api_key=GROQ)
     Settings.llm = llm
@@ -153,5 +153,6 @@ def query(prompt:str, server) -> str:
     #Rag query agent and querying
     query_engine = index.as_query_engine(filter=filter)
     response = query_engine.query(prompt)
+    print("Response: "+str(response))
 
     return response
