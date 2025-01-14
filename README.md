@@ -61,3 +61,39 @@ Get the Bot invite link (OAuth2 URL) from your discord developer portal, invite 
 
 ## Contributors
 ---
+<table>
+	<tr align="center">
+		<td>
+		Noel Alex
+		<p align="center">
+			<img src = "https://avatars.githubusercontent.com/u/79050483?v=4" width="150" height="150">
+		</p>
+			<p align="center">
+				<a href = "https://github.com/Noel-alex">
+					<img src = "http://www.iconninja.com/files/241/825/211/round-collaboration-social-github-code-circle-network-icon.svg" width="36" height = "36" alt="GitHub"/>
+				</a>
+				<a href = "https://www.linkedin.com/in/noel-alex-b1731128b/">
+					<img src = "http://www.iconninja.com/files/863/607/751/network-linkedin-social-connection-circular-circle-media-icon.svg" width="36" height="36" alt="LinkedIn"/>
+				</a>
+			</p>
+		</td>
+	<tr align="center">
+		<td>
+		Sidhant Srivastav
+		<p align="center">
+			<img src = "https://avatars.githubusercontent.com/u/66166455?v=4" width="150" height="150">
+		</p>
+			<p align="center">
+				<a href = "https://github.com/sidhant-sriv">
+					<img src = "http://www.iconninja.com/files/241/825/211/round-collaboration-social-github-code-circle-network-icon.svg" width="36" height = "36" alt="GitHub"/>
+				</a>
+				<a href = "https://www.linkedin.com/in/sidhant-srivastava-41803620b/">
+					<img src = "http://www.iconninja.com/files/863/607/751/network-linkedin-social-connection-circular-circle-media-icon.svg" width="36" height="36" alt="LinkedIn"/>
+				</a>
+			</p>
+		</td>
+</table>
+
+<p align="center">
+	Made with ❤ by <a href="https://dscvit.com">GDSC-VIT</a>
+</p>
