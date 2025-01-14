@@ -13,8 +13,10 @@ from llama_index.core.vector_stores.types import (
     FilterCondition,
 )
 from pinecone import Pinecone, ServerlessSpec
+from langchain import hub
+from llama_index.core.prompts import LangchainPromptTemplate
 
-
+langchain_prompt = hub.pull('rlm/rag-prompt')
 
 #Load Tokens
 load_dotenv()
@@ -92,6 +94,16 @@ def generate_embeddings(documents_path:str, server, channel)->None:
 
 
     pc = Pinecone(api_key=pinecone_api)
+
+    print(pc.list_indexes())
+    '''if "ultrachat" not in pc.list_indexes()['indexes'][0]:
+        pc.create_index(name="ultrachat",
+                        metric = "dotproduct",
+                        dimension=384,
+                        spec=ServerlessSpec(cloud="aws", region="us-east-1")
+                        )'''
+
+
     pinecone_index = pc.Index("ultrachat")
 
     vector_store = PineconeVectorStore(pinecone_index=pinecone_index)
@@ -112,6 +124,7 @@ def query(prompt:str, server, channel) -> str:
         prompt (str): Prompt to the llm
         embedding_path (str): Path to the chroma vector store to use as context to the prompt
     """
+    global langchain_prompt
     print("Query: "+prompt)
     #Initialising the llm model instance
     llm = Groq(model=llm_model, api_key=GROQ)
@@ -152,6 +165,17 @@ def query(prompt:str, server, channel) -> str:
     #TODO: create a prompt template
     #Rag query agent and querying
     query_engine = index.as_query_engine(filter=filter)
+
+    lc_prompt_tmpl = LangchainPromptTemplate(
+        template=langchain_prompt,
+        template_var_mappings={"query_str": "question", "context_str": "context"},
+    )
+
+    query_engine.update_prompts(
+        {"response_synthesizer:text_qa_template": lc_prompt_tmpl}
+    )
+
+
     response = query_engine.query(prompt)
     print("Response: "+str(response))
 
