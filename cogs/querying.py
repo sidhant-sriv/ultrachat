@@ -31,7 +31,7 @@ class Querying(commands.Cog):
 
         #queries if context (vector store) exists
         if os.path.exists(embedding_path):
-            response = query.query(prompt, server = ctx.guild.id, channel = ctx.channel.name)
+            response = query.query(prompt, server = ctx.guild.id, channel = ctx.channel.id)
 
             #Generating discord embed as response to the query
             query_embed = discord.Embed(timestamp=datetime.utcnow(), title='Prompt: '+prompt,

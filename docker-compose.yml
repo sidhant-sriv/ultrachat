@@ -10,14 +10,16 @@ services:
       - ./vectors:/usr/src/app/vectors
       - ./chats:/usr/src/app/chats
 
-  discord-bot-backend:
-    build:
-      context: ./ultra-chat-backend
-      dockerfile: Dockerfile
-    image: UltraChat:backend
-    env_file:
-      - ./ultrachat-backend/.env
-    ports:
-      - "5001:5001"
-    depends_on:
-      - discord-bot
+#if ultra-chat-backend is in this folder too
+
+#  discord-bot-backend:
+#    build:
+#      context: ./ultra-chat-backend
+#      dockerfile: Dockerfile
+#    image: UltraChat:backend
+#    env_file:
+#      - ./ultrachat-backend/.env
+#    ports:
+#      - "5001:5001"
+#    depends_on:
+#      - discord-bot
