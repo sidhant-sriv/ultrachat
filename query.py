@@ -96,12 +96,10 @@ def generate_embeddings(documents_path:str, server, channel)->None:
     pc = Pinecone(api_key=pinecone_api)
 
     print(pc.list_indexes())
-    '''if "ultrachat" not in pc.list_indexes()['indexes'][0]:
-        pc.create_index(name="ultrachat",
-                        metric = "dotproduct",
-                        dimension=384,
-                        spec=ServerlessSpec(cloud="aws", region="us-east-1")
-                        )'''
+
+    #uncomment to create an index for the first time only
+
+    #pc.create_index(name="ultrachat",metric = "dotproduct",dimension=384,spec=ServerlessSpec(cloud="aws", region="us-east-1"))
 
 
     pinecone_index = pc.Index("ultrachat")
