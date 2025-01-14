@@ -1,24 +1,27 @@
-from langchain_community.embeddings import HuggingFaceInferenceAPIEmbeddings
 import os
 from dotenv import load_dotenv
 from llama_index.llms.groq import Groq
-import chromadb
-from llama_index.vector_stores.chroma import ChromaVectorStore
+from llama_index.vector_stores.pinecone import PineconeVectorStore
 from llama_index.core import StorageContext
 from llama_index.core import Settings
 from llama_index.core import VectorStoreIndex, SimpleDirectoryReader
 from llama_index.embeddings.cohere import CohereEmbedding
-import pymongo
-from llama_index.vector_stores.mongodb import MongoDBAtlasVectorSearch
-import uuid
+from llama_index.core.vector_stores.types import (
+    MetadataFilter,
+    MetadataFilters,
+    FilterOperator,
+    FilterCondition,
+)
+from pinecone import Pinecone, ServerlessSpec
+
+
 
 #Load Tokens
 load_dotenv()
 GROQ = os.getenv('GROQ')
 HF_TOKEN = os.getenv('HF_TOKEN')
 cohere_api_key = os.getenv('COHERE_API_KEY')
-mongo_uri = os.getenv('mongo_uri')
-
+pinecone_api = os.getenv('PINECONE_API')
 
 llm_model = "llama-3.1-8b-instant"
 
@@ -79,25 +82,26 @@ def generate_embeddings(documents_path:str, server, channel)->None:
     #Document reader
     documents = SimpleDirectoryReader(documents_path).load_data()
     for document in documents:
-        document.metadata = {"server": int(server), "channel": str(channel)}
+        print(document.get_doc_id())
+        document.doc_id = "hi"
+        print(document.get_doc_id())
+        document.metadata = {"server": str(server), "channel": str(channel)}
 
     print(documents[0].metadata)
 
-    mongodb_client = pymongo.MongoClient(mongo_uri)
-    store = MongoDBAtlasVectorSearch(mongodb_client, db_name = "UltraChat", collection_name=str(server), id_key=str(uuid.uuid4()))
-
-    store.create_vector_search_index(
-        dimensions=384, path="embedding", similarity="cosine"
-    )
 
 
-    storage_context = StorageContext.from_defaults(vector_store=store)
+    pc = Pinecone(api_key=pinecone_api)
+    pinecone_index = pc.Index("ultrachat")
 
-    #TODO: USE cache backed embeddings
+    vector_store = PineconeVectorStore(pinecone_index=pinecone_index)
+    storage_context = StorageContext.from_defaults(vector_store=vector_store)
     index = VectorStoreIndex.from_documents(
         documents, storage_context=storage_context
     )
 
+
+    #TODO: USE cache backed embeddings
     print('Done generating embeddings')
 
 
@@ -122,20 +126,32 @@ def query(prompt:str, server) -> str:
 
     Settings.embed_model = embeddings
 
-    mongodb_client = pymongo.MongoClient(mongo_uri)
-    store = MongoDBAtlasVectorSearch(mongodb_client, db_name = "UltraChat", collection_name=str(server))
+    pc = Pinecone(api_key=pinecone_api)
 
-    storage_context = StorageContext.from_defaults(vector_store=store)
+    pinecone_index = pc.Index("ultrachat")
+    vector_store = PineconeVectorStore(pinecone_index=pinecone_index)
+
+    storage_context = StorageContext.from_defaults(vector_store=vector_store)
 
     # TODO: USE cache backed embeddings
     index = VectorStoreIndex.from_vector_store(
-        vector_store=store, storage_context=storage_context
+        vector_store=vector_store, storage_context=storage_context
     )
 
+    filter = MetadataFilters(
+        filters=[
+            MetadataFilter(
+                key="server",
+                value=str(server),
+                operator=FilterOperator.EQ,
+            )
+        ],
+        condition=FilterCondition.AND,
+    )
 
     #TODO: create a prompt template
     #Rag query agent and querying
-    query_engine = index.as_query_engine()
+    query_engine = index.as_query_engine(filter=filter)
     response = query_engine.query(prompt)
 
     return response
