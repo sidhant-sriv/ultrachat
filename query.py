@@ -52,7 +52,7 @@ def create_folders_and_file(folder_path, filename) ->str:
 
 
 
-def generate_embeddings(documents_path:str, save_path:str)->None:
+def generate_embeddings(documents_path:str, server:str, embedding_path)->None:
     """
     Generates embeddings for files present in a given folder and stores those vectors in a chroma vector store
     at a given folder
@@ -75,10 +75,10 @@ def generate_embeddings(documents_path:str, save_path:str)->None:
 
     #Document reader
     documents = SimpleDirectoryReader(documents_path).load_data()
-    db = chromadb.PersistentClient(path=save_path)
+    db = chromadb.PersistentClient(path=embedding_path)
 
     # create collection
-    chroma_collection = db.get_or_create_collection("quickstart")
+    chroma_collection = db.get_or_create_collection(server)
 
     #TODO: Switch from Chroma to Weaviate or SupaBase
     vector_store = ChromaVectorStore(chroma_collection=chroma_collection)
@@ -93,7 +93,7 @@ def generate_embeddings(documents_path:str, save_path:str)->None:
     print('Done generating embeddings')
 
 
-def query(prompt:str, embedding_path:str) -> str:
+def query(prompt:str, server, embedding_path) -> str:
     """
     Rag query agent that uses context from a vector store to respond to a prompt
     args:
@@ -117,7 +117,7 @@ def query(prompt:str, embedding_path:str) -> str:
     db = chromadb.PersistentClient(path=embedding_path)
 
     # get collection
-    chroma_collection = db.get_or_create_collection("quickstart")
+    chroma_collection = db.get_or_create_collection(server)
 
     # assign chroma as the vector_store to the context
     vector_store = ChromaVectorStore(chroma_collection=chroma_collection)

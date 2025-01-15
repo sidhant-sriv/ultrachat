@@ -27,18 +27,18 @@ class Querying(commands.Cog):
         """
 
         #general vector store directory
-        vector_store_directory = f'vectors/{ctx.guild.id}/common'
+        vector_store_directory = f'vectors/common'
 
         #accesses the private vector store for specific private channels in given discord server
         if str(ctx.channel.type) == "private":
-            vector_store_directory = f'vectors/{ctx.guild.id}/private/{ctx.channel.id}'
+            vector_store_directory = f'vectors/private'
 
         #vector store path
-        embedding_path = vector_store_directory + '/embeddings'
+        embedding_path = vector_store_directory
 
         #queries if context (vector store) exists
-        if os.path.exists(embedding_path):
-            response = query.query(prompt, embedding_path=embedding_path)
+        try:
+            response = query.query(prompt, ctx.server.id, embedding_path)
 
             #Generating discord embed as response to the query
             query_embed = discord.Embed(timestamp=datetime.utcnow(), title='Prompt: '+prompt,
@@ -48,7 +48,7 @@ class Querying(commands.Cog):
             query_embed.set_footer(text="UltraChat by GDSC")
 
             await ctx.channel.send(embed=query_embed)
-        else:
+        except Exception:
             #handles case if no context is found
             await ctx.channel.send('No context found, use the collect command first')
 
