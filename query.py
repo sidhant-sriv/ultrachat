@@ -8,7 +8,10 @@ from llama_index.core import StorageContext
 from llama_index.core import Settings
 from llama_index.core import VectorStoreIndex, SimpleDirectoryReader
 from llama_index.embeddings.cohere import CohereEmbedding
+from langchain import hub
+from llama_index.core.prompts import LangchainPromptTemplate
 
+langchain_prompt = hub.pull('rlm/rag-prompt')
 #Load Tokens
 load_dotenv()
 GROQ = os.getenv('GROQ')
@@ -131,5 +134,13 @@ def query(prompt:str, server, embedding_path) -> str:
     #TODO: create a prompt template
     #Rag query agent and querying
     query_engine = index.as_query_engine()
+    lc_prompt_tmpl = LangchainPromptTemplate(
+        template=langchain_prompt,
+        template_var_mappings={"query_str": "question", "context_str": "context"},
+    )
+
+    query_engine.update_prompts(
+        {"response_synthesizer:text_qa_template": lc_prompt_tmpl}
+    )
     response = query_engine.query(prompt)
     return response
