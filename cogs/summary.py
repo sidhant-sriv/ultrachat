@@ -127,21 +127,21 @@ class Summary(commands.Cog):
 
         await ctx.channel.send(f'Collected the last {num_messages} messages and saved them to {file_name}')
 
-        vector_store_directory = f'vectors/{ctx.guild.id}/common'
+        vector_store_directory = f'./vectors/common'
         if str(ctx.channel.type) == "private":
-            vector_store_directory = f'vectors/{ctx.guild.id}/private/{ctx.channel.id}'
+            vector_store_directory = f'./vectors/private'
 
         file_name = f'all_text.txt'
-        all_chat_path = os.path.join(vector_store_directory, file_name)
-        save_path = os.path.join(vector_store_directory, 'embeddings')
-        temp_path = os.path.join(vector_store_directory, 'TEMP')
+        all_chat_path = os.path.join(vector_store_directory+f"/{ctx.guild.id}", file_name)
+        save_path = os.path.join(vector_store_directory, "embeddings")
+        temp_path = os.path.join(vector_store_directory+f'/{ctx.guild.id}', 'TEMP')
         temp_file = os.path.join(temp_path, 'temp.txt')
 
         if not os.path.exists(all_chat_path):
-            query.create_folders_and_file(vector_store_directory, file_name)
+            query.create_folders_and_file(vector_store_directory+f"/{ctx.guild.id}", file_name)
 
         if not os.path.exists(temp_file):
-            query.create_folders_and_file(temp_path, 'TEMP.txt')
+            query.create_folders_and_file(temp_path, 'temp.txt')
 
         with open(all_chat_path, 'a+', encoding='utf-8') as all_chat:
             with open(chat_path, 'r', encoding='utf-8') as chat:
@@ -152,8 +152,12 @@ class Summary(commands.Cog):
                         if message not in all_messages:
                             all_chat.write('\n'+message)
                             temp.write('\n'+message)
-
-                query.generate_embeddings(save_path=save_path, documents_path=temp_path)
+                print("starting embed generation")
+                print("Server in collection command:-", 'c'+str(ctx.guild.id))
+                try:
+                    query.generate_embeddings(embedding_path=save_path, documents_path=temp_path, server='c'+str(ctx.guild.id))
+                except Exception as e:
+                    print(e)
 
                 with open(temp_file, 'w', encoding='utf-8') as f:
                     pass

@@ -34,11 +34,13 @@ class Querying(commands.Cog):
             vector_store_directory = f'vectors/private'
 
         #vector store path
-        embedding_path = vector_store_directory
+        embedding_path = os.path.join(vector_store_directory, "embeddings")
 
         #queries if context (vector store) exists
         try:
-            response = query.query(prompt, ctx.server.id, embedding_path)
+            print("Server in querying cog:-", 'c'+str(ctx.guild.id))
+
+            response = query.query(prompt, server='c'+str(ctx.guild.id), embedding_path=embedding_path, channel=str(ctx.channel.name))
 
             #Generating discord embed as response to the query
             query_embed = discord.Embed(timestamp=datetime.utcnow(), title='Prompt: '+prompt,
@@ -48,8 +50,9 @@ class Querying(commands.Cog):
             query_embed.set_footer(text="UltraChat by GDSC")
 
             await ctx.channel.send(embed=query_embed)
-        except Exception:
+        except Exception as e:
             #handles case if no context is found
+            print(e)
             await ctx.channel.send('No context found, use the collect command first')
 
 

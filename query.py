@@ -1,4 +1,3 @@
-from langchain_community.embeddings import HuggingFaceInferenceAPIEmbeddings
 import os
 from dotenv import load_dotenv
 from llama_index.llms.groq import Groq
@@ -10,6 +9,8 @@ from llama_index.core import VectorStoreIndex, SimpleDirectoryReader
 from llama_index.embeddings.cohere import CohereEmbedding
 from langchain import hub
 from llama_index.core.prompts import LangchainPromptTemplate
+
+
 
 langchain_prompt = hub.pull('rlm/rag-prompt')
 #Load Tokens
@@ -53,42 +54,33 @@ def create_folders_and_file(folder_path, filename) ->str:
   except OSError as e:
     print(f"Error creating file: {e}")
 
-
-
-def generate_embeddings(documents_path:str, server:str, embedding_path)->None:
-    """
-    Generates embeddings for files present in a given folder and stores those vectors in a chroma vector store
-    at a given folder
-    args:
-        documents_path (str): Path to the folders containing contextual data
-        save_path (str): Path to the folder where the embeddings will be stored (in a folder named embeddings)
-    """
+def generate_embeddings(documents_path:str, server:str, embedding_path:str, channel:str)->None:
     print("Generating embeddings...")
 
-
+    load_dotenv()
     # Initialize embeddings
-
     embeddings = CohereEmbedding(
         api_key=cohere_api_key,
         model_name="embed-english-light-v3.0",
         input_type="search_query",
 
     )
+
     Settings.embed_model = embeddings
 
-    #Document reader
+    #    Settings.embed_model = HuggingFaceEmbedding(
+    #    model_name = 'nomic-ai/nomic-embed-text-v1'
+    #    )
+
     documents = SimpleDirectoryReader(documents_path).load_data()
     db = chromadb.PersistentClient(path=embedding_path)
-
     # create collection
     chroma_collection = db.get_or_create_collection(server)
 
-    #TODO: Switch from Chroma to Weaviate or SupaBase
     vector_store = ChromaVectorStore(chroma_collection=chroma_collection)
     storage_context = StorageContext.from_defaults(vector_store=vector_store)
 
     # create your index
-    #TODO: USE cache backed embeddings
     index = VectorStoreIndex.from_documents(
         documents, storage_context=storage_context
     )
@@ -96,23 +88,18 @@ def generate_embeddings(documents_path:str, server:str, embedding_path)->None:
     print('Done generating embeddings')
 
 
-def query(prompt:str, server, embedding_path) -> str:
-    """
-    Rag query agent that uses context from a vector store to respond to a prompt
-    args:
-        prompt (str): Prompt to the llm
-        embedding_path (str): Path to the chroma vector store to use as context to the prompt
-    """
 
-    #Initialising the llm model instance
-    llm = Groq(model=llm_model, api_key=GROQ)
+def query(prompt:str, server:str, embedding_path:str, channel:str) -> str:
+    model = "llama-3.1-8b-instant"
+    llm = Groq(model=model, api_key=GROQ)
     Settings.llm = llm
 
-    #Initialise Embeddings
+    # Initialize embeddings
     embeddings = CohereEmbedding(
         api_key=cohere_api_key,
         model_name="embed-english-light-v3.0",
         input_type="search_query",
+
     )
     Settings.embed_model = embeddings
 
@@ -130,9 +117,6 @@ def query(prompt:str, server, embedding_path) -> str:
     index = VectorStoreIndex.from_vector_store(
         vector_store, storage_context=storage_context
     )
-
-    #TODO: create a prompt template
-    #Rag query agent and querying
     query_engine = index.as_query_engine()
     lc_prompt_tmpl = LangchainPromptTemplate(
         template=langchain_prompt,
@@ -142,5 +126,5 @@ def query(prompt:str, server, embedding_path) -> str:
     query_engine.update_prompts(
         {"response_synthesizer:text_qa_template": lc_prompt_tmpl}
     )
-    response = query_engine.query(prompt)
+    response = query_engine.query(f"query made from {channel}"+prompt)
     return response
