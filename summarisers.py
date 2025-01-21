@@ -30,7 +30,7 @@ def large_summariser(file_name):
 
     num_documents = len(docs)
 
-    print(f"Now our book is split up into {num_documents} documents")
+    print(f"Now our chat is split up into {num_documents} documents")
     embeddings =  CohereEmbeddings(model="embed-english-v3.0")
 
     vectors = embeddings.embed_documents([x.page_content for x in docs])
@@ -38,6 +38,8 @@ def large_summariser(file_name):
     num_clusters = num_documents//9
     if num_clusters > 9:
         num_clusters = 9
+    if num_clusters == 0:
+        num_clusters=2
 
     print(f"Number of clusters {num_clusters}")
 

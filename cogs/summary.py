@@ -120,10 +120,8 @@ class Summary(commands.Cog):
         except (IndexError, ValueError):
             num_messages = 10
 
-        if num_messages > 1000:
-            num_messages = 1000
-
-
+        if num_messages > 100_000:
+            num_messages = 100_000
 
         messages = []
         async for msg in ctx.channel.history(limit=num_messages):
@@ -248,7 +246,7 @@ class Summary(commands.Cog):
             else:
                 login_url = "https://discord.com/api/oauth2/authorize?client_id=1256967412943949904\u0026redirect_uri=https://ultra-achat-go-backend.onrender.com/callback\u0026response_type=code\u0026scope=identify%20email"
                 login_embed_url = f"{login_url}"
-                summary.add_field(name="Login to save summaries", value=f"[Login Here]({login_embed_url})")
+                summary_embed.add_field(name=f"Login to save summaries (generated in ({(generation_end-generation_start):.2f} secs)", value=f"[Login Here]({login_embed_url})")
 
             await original_message.edit(embed=summary_embed)
 
