@@ -240,7 +240,7 @@ class Summary(commands.Cog):
             #TODO: ADD START AND END TIME FOR GENERATION AND SAVING, make edit to embed
             end_time = time.time()
             if str(response.status_code) == '201':
-                summary_embed.add_field(name=f"Summary generated in {(generation_end-generation_start):.2f} secs saved in {(end_time-generation_end):.2f} secs", value=f"your summary has been saved successfully")
+                summary_embed.add_field(name=f"Summary generated in {(generation_end-generation_start):.2f} secs saved to server in {(end_time-generation_end):.2f} secs", value=f"your summary has been saved successfully")
 
 
             else:

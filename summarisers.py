@@ -35,11 +35,8 @@ def large_summariser(file_name):
 
     vectors = embeddings.embed_documents([x.page_content for x in docs])
 
-    num_clusters = num_documents//9
-    if num_clusters > 9:
-        num_clusters = 9
-    if num_clusters == 0:
-        num_clusters=2
+    num_clusters = num_documents//9 + 2
+
 
     print(f"Number of clusters {num_clusters}")
 
@@ -68,16 +65,10 @@ def large_summariser(file_name):
 
     map_prompt = """You will be given a single passage of a Discord Chat log. This section will be enclosed in triple backticks (```)
     Summarize the summaries capturing all essential details. Include:
-
-Participants: Key individuals involved.
-Topics: Main and subtopics discussed.
 Key Points: Critical points, decisions, conclusions.
 Important Messages: Significant messages or exchanges.
 Context: Relevant references or external content.
-Tone and Sentiment: General tone and any shifts in sentiment.
 Ensure the summary is clear, thorough, and easy to understand, leaving no important details out. Assume the reader is unfamiliar with the conversation.
-
-
     ```{text}```
 FULL SUMMARY:
     """
