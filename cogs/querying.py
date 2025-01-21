@@ -27,12 +27,19 @@ class Querying(commands.Cog):
         """
 
         #general vector store directory
-        embedding_path = f'vectors/{ctx.guild.id}/'
+        vector_store_directory = f'vectors/common'
+
+        #accesses the private vector store for specific private channels in given discord server
+        if str(ctx.channel.type) == "private":
+            vector_store_directory = f'vectors/private'
+
+        #vector store path
+        embedding_path = os.path.join(vector_store_directory, "embeddings")
 
         #queries if context (vector store) exists
-        if os.path.exists(embedding_path):
-            response = query.query(prompt, server = ctx.guild.id, channel = ctx.channel.id)
 
+        response = query.query(prompt, server='c'+str(ctx.guild.id), embedding_path=embedding_path, channel=str(ctx.channel.name))
+        if str(response) != "Empty Response":
             #Generating discord embed as response to the query
             query_embed = discord.Embed(timestamp=datetime.utcnow(), title='Prompt: '+prompt,
                                               colour=0xB0B0BF, description=response)
