@@ -1,7 +1,8 @@
 import os
 from dotenv import load_dotenv
 from llama_index.llms.groq import Groq
-from llama_index.vector_stores.pinecone import PineconeVectorStore
+import chromadb
+from llama_index.vector_stores.chroma import ChromaVectorStore
 from llama_index.core import StorageContext
 from llama_index.core import Settings
 from llama_index.core import VectorStoreIndex, SimpleDirectoryReader
@@ -11,14 +12,13 @@ from llama_index.core import PromptTemplate
 
 
 
-
 #langchain_prompt = hub.pull('rlm/rag-prompt')
 #Load Tokens
 load_dotenv()
 GROQ = os.getenv('GROQ')
 HF_TOKEN = os.getenv('HF_TOKEN')
 cohere_api_key = os.getenv('COHERE_API_KEY')
-pinecone_api = os.getenv('PINECONE_API')
+
 
 llm_model = "llama-3.1-8b-instant"
 
@@ -54,17 +54,7 @@ def create_folders_and_file(folder_path, filename) ->str:
   except OSError as e:
     print(f"Error creating file: {e}")
 
-
-
-
 def generate_embeddings(documents_path:str, server:str, embedding_path:str, channel:str)->None:
-    """
-    Generates embeddings for files present in a given folder and stores those vectors in a chroma vector store
-    at a given folder
-    args:
-        documents_path (str): Path to the folders containing contextual data
-
-    """
     print("Generating embeddings...")
 
     load_dotenv()
@@ -73,6 +63,7 @@ def generate_embeddings(documents_path:str, server:str, embedding_path:str, chan
         api_key=cohere_api_key,
         model_name="embed-english-light-v3.0",
         input_type="search_query",
+
     )
 
     Settings.embed_model = embeddings
@@ -84,7 +75,6 @@ def generate_embeddings(documents_path:str, server:str, embedding_path:str, chan
     documents = SimpleDirectoryReader(documents_path).load_data()
     for document in documents:
         document.metadata = {"server": server[1:0], "channel": channel}
-
     db = chromadb.PersistentClient(path=embedding_path)
     # create collection
     chroma_collection = db.get_or_create_collection(server)
@@ -97,10 +87,7 @@ def generate_embeddings(documents_path:str, server:str, embedding_path:str, chan
         documents, storage_context=storage_context
     )
 
-
-    #TODO: USE cache backed embeddings
     print('Done generating embeddings')
-
 
 
 
@@ -116,15 +103,17 @@ def query(prompt:str, server:str, embedding_path:str, channel:str) -> str:
         input_type="search_query",
 
     )
-
     Settings.embed_model = embeddings
 
+    # initialize client
+    db = chromadb.PersistentClient(path=embedding_path)
 
     # get collection
     chroma_collection = db.get_or_create_collection(server)
 
+    # assign chroma as the vector_store to the context
+    vector_store = ChromaVectorStore(chroma_collection=chroma_collection)
     storage_context = StorageContext.from_defaults(vector_store=vector_store)
-
 
     qa_prompt_tmpl = (
         "The following is a Discord chat log.\n"
@@ -140,21 +129,9 @@ def query(prompt:str, server:str, embedding_path:str, channel:str) -> str:
 
     # load your index from stored vectors
     index = VectorStoreIndex.from_vector_store(
-        vector_store=vector_store, storage_context=storage_context
-    )
-
-    filter = MetadataFilters(
-        filters=[
-            MetadataFilter(
-                key="server",
-                value=str(server),
-                operator=FilterOperator.EQ,
-            )
-        ],
-        condition=FilterCondition.AND,
+        vector_store, storage_context=storage_context
     )
     query_engine = index.as_query_engine(summary_template = qa_prompt)
-
 
     response = query_engine.query(f"query made from {channel}"+prompt)
     return response
