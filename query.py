@@ -8,11 +8,11 @@ from llama_index.core import Settings
 from llama_index.core import VectorStoreIndex, SimpleDirectoryReader
 from llama_index.embeddings.cohere import CohereEmbedding
 from langchain import hub
-from llama_index.core.prompts import LangchainPromptTemplate
+from llama_index.core import PromptTemplate
 
 
 
-langchain_prompt = hub.pull('rlm/rag-prompt')
+#langchain_prompt = hub.pull('rlm/rag-prompt')
 #Load Tokens
 load_dotenv()
 GROQ = os.getenv('GROQ')
@@ -73,6 +73,8 @@ def generate_embeddings(documents_path:str, server:str, embedding_path:str, chan
     #    )
 
     documents = SimpleDirectoryReader(documents_path).load_data()
+    for document in documents:
+        document.metadata = {"server": server[1:0], "channel": channel}
     db = chromadb.PersistentClient(path=embedding_path)
     # create collection
     chroma_collection = db.get_or_create_collection(server)
@@ -113,18 +115,23 @@ def query(prompt:str, server:str, embedding_path:str, channel:str) -> str:
     vector_store = ChromaVectorStore(chroma_collection=chroma_collection)
     storage_context = StorageContext.from_defaults(vector_store=vector_store)
 
+    qa_prompt_tmpl = (
+        "The following is a Discord chat log.\n"
+        "---------------------\n"
+        "{context_str}\n"
+        "---------------------\n"
+        "Given the context of the Discord chat log and not prior knowledge, "
+        "answer the query.\n"
+        "Query: {query_str}\n"
+        "Answer: "
+    )
+    qa_prompt = PromptTemplate(qa_prompt_tmpl)
+
     # load your index from stored vectors
     index = VectorStoreIndex.from_vector_store(
         vector_store, storage_context=storage_context
     )
-    query_engine = index.as_query_engine()
-    lc_prompt_tmpl = LangchainPromptTemplate(
-        template=langchain_prompt,
-        template_var_mappings={"query_str": "question", "context_str": "context"},
-    )
+    query_engine = index.as_query_engine(summary_template = qa_prompt)
 
-    query_engine.update_prompts(
-        {"response_synthesizer:text_qa_template": lc_prompt_tmpl}
-    )
     response = query_engine.query(f"query made from {channel}"+prompt)
     return response

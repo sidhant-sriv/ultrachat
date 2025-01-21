@@ -17,7 +17,7 @@ from llama_index.embeddings.cohere import CohereEmbedding
 from database import *
 from llama_index.core import PromptTemplate
 import time
-
+import summarisers
 
 
 
@@ -26,6 +26,13 @@ thumbnail = os.getenv("EMBED_THUMBNAIL")
 #TODO: cycle through API Keys
 #TODO: Convert function to async
 def summarize_document(file_name='message_history.txt'):
+    print("generating summary")
+    with open(file_name, 'r', encoding='utf-8') as f:
+        if len(f.read()) > 10000:
+            return summarisers.large_summariser(file_name=file_name)
+
+
+
     # Apply nest_asyncio
     nest_asyncio.apply()
 
@@ -84,10 +91,18 @@ def summarize_document(file_name='message_history.txt'):
 
     # Create the query engine
     query_engine = doc_summary_index.as_query_engine(response_mode="tree_summarize", use_async=True, verbose=True, summary_template = qa_prompt)
+    query_prompt ='''Summarize the following Discord chat log, capturing all essential details. Include:
 
+Participants: Key individuals involved.
+Topics: Main and subtopics discussed.
+Key Points: Critical points, decisions, conclusions.
+Important Messages: Significant messages or exchanges.
+Context: Relevant references or external content.
+Tone and Sentiment: General tone and any shifts in sentiment.
+Ensure the summary is clear, thorough, and easy to understand, leaving no important details out. Assume the reader is unfamiliar with the conversation.'''
 
     # Return the query result
-    return query_engine.query(query)
+    return query_engine.query(query_prompt)
 
 
 
@@ -152,10 +167,8 @@ class Summary(commands.Cog):
                         if message not in all_messages:
                             all_chat.write('\n'+message)
                             temp.write('\n'+message)
-                print("starting embed generation")
-                print("Server in collection command:-", 'c'+str(ctx.guild.id))
                 try:
-                    query.generate_embeddings(embedding_path=save_path, documents_path=temp_path, server='c'+str(ctx.guild.id))
+                    query.generate_embeddings(embedding_path=save_path, documents_path=temp_path, server='c'+str(ctx.guild.id), channel=str(ctx.channel.name))
                 except Exception as e:
                     print(e)
 
@@ -193,7 +206,7 @@ class Summary(commands.Cog):
 
     @commands.command(name="summary")
     async def summary(self, ctx, priv=None):
-        start_end = time.time()
+        generation_start = time.time()
         """provides a summary of a given chat log saved by the collect command"""
         file_directory = f'chats/{ctx.author.name}/{ctx.message.guild.name}'
         file_name = f'{ctx.message.channel.name}.txt'
@@ -210,6 +223,13 @@ class Summary(commands.Cog):
             summary_embed.set_thumbnail(url=thumbnail)
             summary_embed.set_footer(text="UltraChat by GDSC")
 
+            if priv in ['p', 'priv', 'private', 'dm']:
+                original_message = await ctx.author.send(embed=summary_embed)
+            else:
+                original_message = await ctx.channel.send(embed=summary_embed)
+
+            generation_end = time.time()
+
             data = {
                 "content": str(summary),
                 "server_id": str(ctx.message.guild.id),
@@ -217,10 +237,10 @@ class Summary(commands.Cog):
                 "user_id": str(ctx.author.id)
             }
             response = create_summary(data)
-
+            #TODO: ADD START AND END TIME FOR GENERATION AND SAVING, make edit to embed
             end_time = time.time()
             if str(response.status_code) == '201':
-                summary_embed.add_field(name=f"Summary saved (in {(end_time-start_end):.2f} sec)", value=f"your summary has been saved successfully")
+                summary_embed.add_field(name=f"Summary generated in {(generation_end-generation_start):.2f} secs saved in {(end_time-generation_end):.2f} secs", value=f"your summary has been saved successfully")
 
 
             else:
@@ -228,15 +248,7 @@ class Summary(commands.Cog):
                 login_embed_url = f"{login_url}"
                 summary.add_field(name="Login to save summaries", value=f"[Login Here]({login_embed_url})")
 
-
-            if priv in ['p', 'priv', 'private', 'dm']:
-                await ctx.author.send(embed=summary_embed)
-            else:
-                await ctx.channel.send(embed=summary_embed)
-
-
-
-
+            await original_message.edit(embed=summary_embed)
 
         else:
             await ctx.channel.send(
