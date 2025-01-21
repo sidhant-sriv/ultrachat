@@ -13,5 +13,8 @@ RUN pip install -r requirements.txt
 # Copy the rest of the application code into the container
 COPY . .
 
-# Specify the command to run the application
-CMD ["python", "app.py"]
+# Install Gunicorn (if not already installed)
+RUN pip install gunicorn
+
+# Use Gunicorn to run the application
+CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:8000", "app:app"]

@@ -1,6 +1,5 @@
 import discord as discord
 from discord.ext import commands
-from googlesearch import search
 import wikipedia
 
 
@@ -21,7 +20,7 @@ class Info(commands.Cog):
             # res.set_image(url=wikipedia.page(t).images[1])
             await ctx.send(embed=res)
         except Exception:
-            await ctx.send(f"Here is a page with all the links that contain {query} <https://en.wikipedia.org/wiki/"+query.title()+">")
+            await ctx.send(f"Here is a page for info on {query} <https://en.wikipedia.org/wiki/"+query.title()+">")
 
 
 async def setup(bot):

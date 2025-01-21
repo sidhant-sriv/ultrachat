@@ -1,4 +1,3 @@
-import discord as discord
 from discord.ext import commands
 
 class Latency(commands.Cog):

@@ -1,24 +1,31 @@
-from llama_index.core import Settings, SimpleDirectoryReader, VectorStoreIndex
-from langchain_community.embeddings import HuggingFaceInferenceAPIEmbeddings
-from llama_index.embeddings.langchain import LangchainEmbedding
 import os
 from dotenv import load_dotenv
 from llama_index.llms.groq import Groq
-import chromadb
-from llama_index.vector_stores.chroma import ChromaVectorStore
+from llama_index.vector_stores.pinecone import PineconeVectorStore
 from llama_index.core import StorageContext
 from llama_index.core import Settings
-from pinecone import Pinecone, ServerlessSpec
 from llama_index.core import VectorStoreIndex, SimpleDirectoryReader
-from llama_index.vector_stores.pinecone import PineconeVectorStore
-from IPython.display import Markdown, display
+from llama_index.embeddings.cohere import CohereEmbedding
+from llama_index.core.vector_stores.types import (
+    MetadataFilter,
+    MetadataFilters,
+    FilterOperator,
+    FilterCondition,
+)
+from pinecone import Pinecone, ServerlessSpec
+from langchain import hub
+from llama_index.core.prompts import LangchainPromptTemplate
+
+langchain_prompt = hub.pull('rlm/rag-prompt')
 
 #Load Tokens
 load_dotenv()
 GROQ = os.getenv('GROQ')
 HF_TOKEN = os.getenv('HF_TOKEN')
+cohere_api_key = os.getenv('COHERE_API_KEY')
+pinecone_api = os.getenv('PINECONE_API')
 
-
+llm_model = "llama-3.1-8b-instant"
 
 
 def create_folders_and_file(folder_path, filename) ->str:
@@ -30,6 +37,7 @@ def create_folders_and_file(folder_path, filename) ->str:
       filename (str): Name of the file to create in the deepest folder.
       content (str, optional): Content to write to the file. Defaults to "This is some text".
   """
+
   # Ensure path is a string
   if not isinstance(folder_path, str):
     raise TypeError("folder_path must be a string")
@@ -53,82 +61,120 @@ def create_folders_and_file(folder_path, filename) ->str:
 
 
 
-def generate_embeddings(documents_path:str, save_path:str)->None:
+def generate_embeddings(documents_path:str, server, channel)->None:
     """
     Generates embeddings for files present in a given folder and stores those vectors in a chroma vector store
     at a given folder
     args:
         documents_path (str): Path to the folders containing contextual data
-        save_path (str): Path to the folder where the embeddings will be stored (in a folder named embeddings)
+
     """
     print("Generating embeddings...")
 
 
-    load_dotenv()
-    HF_TOKEN = os.getenv('HF_TOKEN')
-
     # Initialize embeddings
-    embeddings = HuggingFaceInferenceAPIEmbeddings(
-        api_key=HF_TOKEN, model_name="BAAI/bge-large-en-v1.5"
+
+    embeddings = CohereEmbedding(
+        api_key=cohere_api_key,
+        model_name="embed-english-light-v3.0",
+        input_type="search_query",
     )
-    embed_model = LangchainEmbedding(embeddings)
     Settings.embed_model = embeddings
 
     #Document reader
     documents = SimpleDirectoryReader(documents_path).load_data()
-    db = chromadb.PersistentClient(path=save_path)
+    for document in documents:
+        print(document.get_doc_id())
+        document.doc_id = "hi"
+        print(document.get_doc_id())
+        document.metadata = {"server": str(server), "channel": str(channel)}
 
-    # create collection
-    chroma_collection = db.get_or_create_collection("quickstart")
+    print(documents[0].metadata)
 
 
-    vector_store = ChromaVectorStore(chroma_collection=chroma_collection)
+
+    pc = Pinecone(api_key=pinecone_api)
+
+    print(pc.list_indexes())
+
+    #uncomment to create an index for the first time only
+
+    #pc.create_index(name="ultrachat",metric = "dotproduct",dimension=384,spec=ServerlessSpec(cloud="aws", region="us-east-1"))
+
+
+    pinecone_index = pc.Index("ultrachat")
+
+    vector_store = PineconeVectorStore(pinecone_index=pinecone_index)
     storage_context = StorageContext.from_defaults(vector_store=vector_store)
-
-    # create your index
     index = VectorStoreIndex.from_documents(
         documents, storage_context=storage_context
     )
 
+
+    #TODO: USE cache backed embeddings
     print('Done generating embeddings')
 
 
-def query(prompt:str, embedding_path:str) -> str:
+def query(prompt:str, server, channel) -> str:
     """
     Rag query agent that uses context from a vector store to respond to a prompt
     args:
         prompt (str): Prompt to the llm
         embedding_path (str): Path to the chroma vector store to use as context to the prompt
     """
-
+    global langchain_prompt
+    print("Query: "+prompt)
     #Initialising the llm model instance
-    model = 'llama3-8b-8192'
-    llm = Groq(model=model, api_key=GROQ)
+    llm = Groq(model=llm_model, api_key=GROQ)
     Settings.llm = llm
 
-    # Initialize embeddings
-    embeddings = HuggingFaceInferenceAPIEmbeddings(
-        api_key=HF_TOKEN, model_name="BAAI/bge-large-en-v1.5"
+    #Initialise Embeddings
+    embeddings = CohereEmbedding(
+        api_key=cohere_api_key,
+        model_name="embed-english-light-v3.0",
+        input_type="search_query",
     )
-    embed_model = LangchainEmbedding(embeddings)
+
     Settings.embed_model = embeddings
 
-    # initialize client
-    db = chromadb.PersistentClient(path=embedding_path)
+    pc = Pinecone(api_key=pinecone_api)
 
-    # get collection
-    chroma_collection = db.get_or_create_collection("quickstart")
+    pinecone_index = pc.Index("ultrachat")
+    vector_store = PineconeVectorStore(pinecone_index=pinecone_index)
 
-    # assign chroma as the vector_store to the context
-    vector_store = ChromaVectorStore(chroma_collection=chroma_collection)
     storage_context = StorageContext.from_defaults(vector_store=vector_store)
 
-    # load your index from stored vectors
+    # TODO: USE cache backed embeddings
     index = VectorStoreIndex.from_vector_store(
-        vector_store, storage_context=storage_context
+        vector_store=vector_store, storage_context=storage_context
     )
 
+    filter = MetadataFilters(
+        filters=[
+            MetadataFilter(
+                key="server",
+                value=str(server),
+                operator=FilterOperator.EQ,
+            )
+        ],
+        condition=FilterCondition.AND,
+    )
+
+    #TODO: create a prompt template
     #Rag query agent and querying
-    query_engine = index.as_query_engine()
+    query_engine = index.as_query_engine(filter=filter)
+
+    lc_prompt_tmpl = LangchainPromptTemplate(
+        template=langchain_prompt,
+        template_var_mappings={"query_str": "question", "context_str": "context"},
+    )
+
+    query_engine.update_prompts(
+        {"response_synthesizer:text_qa_template": lc_prompt_tmpl}
+    )
+
+
     response = query_engine.query(prompt)
+    print("Response: "+str(response))
+
     return response

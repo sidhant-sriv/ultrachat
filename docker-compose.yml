@@ -2,6 +2,24 @@ services:
   discord-bot:
     build:
       context: .
-      dockerfile: Dockerfile # Replace with your actual Dockerfile name if different
+      dockerfile: Dockerfile
+    image: UltraChat:base
     env_file:
       - .env
+    volumes:
+      - ./vectors:/usr/src/app/vectors
+      - ./chats:/usr/src/app/chats
+
+#if ultra-chat-backend is in this folder too
+
+#  discord-bot-backend:
+#    build:
+#      context: ./ultra-chat-backend
+#      dockerfile: Dockerfile
+#    image: UltraChat:backend
+#    env_file:
+#      - ./ultrachat-backend/.env
+#    ports:
+#      - "5001:5001"
+#    depends_on:
+#      - discord-bot

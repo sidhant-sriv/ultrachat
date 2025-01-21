@@ -86,3 +86,4 @@ message_history
 chats/
 vectors/
 testing.py
+test.py
