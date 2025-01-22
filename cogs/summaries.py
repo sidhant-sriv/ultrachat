@@ -107,8 +107,9 @@ class Summaries(commands.Cog):
             await ctx.send(":warning: Incorrect use of the command, use !help for more information")
 
         response = get_summaries(ctx.author.id, ctx.guild.id)
-        if response.status_code != 200:
-            await ctx.send("Please login to use the summaries command by using !login")
+
+        if int(response.status_code) != 200 or response.json() == None:
+            await ctx.send("Please login to use the summaries command by using !login and generate summaries")
             return
 
         summaries_list = [i for i in response.json() if (str(ctx.author.id) in i.values()) and (str(ctx.guild.id) in i.values())]
