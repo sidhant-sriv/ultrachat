@@ -28,7 +28,7 @@ thumbnail = os.getenv("EMBED_THUMBNAIL")
 def summarize_document(file_name='message_history.txt'):
     print("generating summary")
     with open(file_name, 'r', encoding='utf-8') as f:
-        if len(f.read()) > 10000:
+        if len(f.read()) > 1000:
             return summarisers.large_summariser(file_name=file_name)
 
 
