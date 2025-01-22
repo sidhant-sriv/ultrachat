@@ -35,8 +35,7 @@ def large_summariser(file_name):
 
     vectors = embeddings.embed_documents([x.page_content for x in docs])
 
-#    num_clusters = num_documents//9 + 2
-    num_clusters = 10
+    num_clusters = num_documents//9 + 2
 
 
     print(f"Number of clusters {num_clusters}")
