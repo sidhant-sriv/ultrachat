@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: UltraChat:base
+    image: ultrachat:base
     env_file:
       - .env
     volumes:
@@ -16,7 +16,7 @@ services:
 #    build:
 #      context: ./ultra-chat-backend
 #      dockerfile: Dockerfile
-#    image: UltraChat:backend
+#    image: ultrachat:backend
 #    env_file:
 #      - ./ultrachat-backend/.env
 #    ports:
