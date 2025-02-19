@@ -32,7 +32,7 @@ class XKCD(c.Cog):
         except AttributeError:
             return "\U00002754 Can't find that comic."
 
-    @c.group(pass_context=True, name='xkcd')
+    @c.group(pass_context=True, name="xkcd")
     async def xkcd(self, ctx):
         """
         Running the command without arguments will display a random comic.
@@ -40,7 +40,11 @@ class XKCD(c.Cog):
         if ctx.invoked_subcommand is None:
             comic = await self.get_comic("random")
             res = discord.Embed(
-                title=comic[2], url=comic[1], description=f"**Comic number {comic[0]}**", colour=discord.Colour(0xB0B0BF))
+                title=comic[2],
+                url=comic[1],
+                description=f"**Comic number {comic[0]}**",
+                colour=discord.Colour(0xB0B0BF),
+            )
             res.set_image(url=comic[1])
             res.set_footer(text=comic[-1])
             await ctx.send(embed=res)
@@ -50,7 +54,11 @@ class XKCD(c.Cog):
         """Get the latest xkcd comic."""
         comic = await self.get_comic("latest")
         res = discord.Embed(
-            title=comic[2], url=comic[1], description=f"Comic number {comic[0]}", colour=discord.Colour(0xB0B0BF))
+            title=comic[2],
+            url=comic[1],
+            description=f"Comic number {comic[0]}",
+            colour=discord.Colour(0xB0B0BF),
+        )
         res.set_image(url=comic[1])
         res.set_footer(text=comic[-1])
         await ctx.send(embed=res)
@@ -60,7 +68,11 @@ class XKCD(c.Cog):
         """Get an xkcd comic by number."""
         comic = await self.get_comic("number", number)
         res = discord.Embed(
-            title=comic[2], url=comic[1], description=f"Comic number {comic[0]}", colour=discord.Colour(0xB0B0BF))
+            title=comic[2],
+            url=comic[1],
+            description=f"Comic number {comic[0]}",
+            colour=discord.Colour(0xB0B0BF),
+        )
         res.set_image(url=comic[1])
         res.set_footer(text=comic[-1])
         await ctx.send(embed=res)

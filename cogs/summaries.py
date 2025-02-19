@@ -4,8 +4,8 @@ from discord.ext import commands
 from datetime import datetime
 from database import *
 
-#loads thumbnail used in the discord embeds
-thumbnail = os.getenv('EMBED_THUMBNAIL')
+# loads thumbnail used in the discord embeds
+thumbnail = os.getenv("EMBED_THUMBNAIL")
 
 
 def embed_generator(title: str, text: str, summary_id: str = None) -> discord.Embed:
@@ -16,70 +16,82 @@ def embed_generator(title: str, text: str, summary_id: str = None) -> discord.Em
         description (str): Description in Discord Embed
     """
 
-
-    #generates discord Embed
-    embed = discord.Embed(timestamp=datetime.utcnow(), title=title,
-                          colour=0xB0B0BF, description=text)
-    embed.set_author(name='UltraChat')
+    # generates discord Embed
+    embed = discord.Embed(
+        timestamp=datetime.utcnow(), title=title, colour=0xB0B0BF, description=text
+    )
+    embed.set_author(name="UltraChat")
     embed.set_thumbnail(url=thumbnail)
     embed.set_footer(text="UltraChat by GDSC")
 
     if summary_id is not None:
-        embed.add_field(name='Summary id', value=summary_id, inline=False)
+        embed.add_field(name="Summary id", value=summary_id, inline=False)
     return embed
+
 
 def sorter(name):
     return int(name[:-4])
+
+
 class SummariesView(discord.ui.View):
     """
     class that handles the View of the summaries along with the functionalities of the buttons
     subclass of discord.ui.View
     """
 
-    def __init__(self, pages:list, num:int, summary_ids, id):
+    def __init__(self, pages: list, num: int, summary_ids, id):
         super().__init__()
         self.pages = pages
         self.page = num
         self.max_num = len(self.pages)
         self.summary_ids = summary_ids
 
-
-    @discord.ui.button(label="<", style=discord.ButtonStyle.primary, custom_id = 'prev')
-    async def button_callback(self, interaction: discord.Interaction, button: discord.ui.Button):
+    @discord.ui.button(label="<", style=discord.ButtonStyle.primary, custom_id="prev")
+    async def button_callback(
+        self, interaction: discord.Interaction, button: discord.ui.Button
+    ):
         if self.page >= 2:
             self.page -= 1
-            await interaction.response.edit_message(embed=self.pages[self.page-1])
+            await interaction.response.edit_message(embed=self.pages[self.page - 1])
 
         elif self.page <= 1:
             self.page = self.max_num
-            await interaction.response.edit_message(embed=self.pages[self.page-1])
+            await interaction.response.edit_message(embed=self.pages[self.page - 1])
 
-    @discord.ui.button(label=">", style=discord.ButtonStyle.primary, custom_id = 'next')
-    async def button_callback1(self, interaction: discord.Interaction, button: discord.ui.Button):
+    @discord.ui.button(label=">", style=discord.ButtonStyle.primary, custom_id="next")
+    async def button_callback1(
+        self, interaction: discord.Interaction, button: discord.ui.Button
+    ):
         if self.page >= self.max_num:
             self.page = 1
-            await interaction.response.edit_message(embed=self.pages[self.page-1])
+            await interaction.response.edit_message(embed=self.pages[self.page - 1])
 
         elif self.page < self.max_num:
             self.page += 1
-            await interaction.response.edit_message(embed=self.pages[self.page-1])
+            await interaction.response.edit_message(embed=self.pages[self.page - 1])
 
-    @discord.ui.button(label="Delete", style=discord.ButtonStyle.danger, custom_id = 'delete')
-    async def button_callback2(self, interaction: discord.Interaction, button: discord.ui.Button):
-        del_summary(self.summary_ids[self.page-1], id)
-        print('Deleted', self.summary_ids[self.page-1])
-        self.summary_ids.remove(self.summary_ids[self.page-1])
-
+    @discord.ui.button(
+        label="Delete", style=discord.ButtonStyle.danger, custom_id="delete"
+    )
+    async def button_callback2(
+        self, interaction: discord.Interaction, button: discord.ui.Button
+    ):
+        del_summary(self.summary_ids[self.page - 1], id)
+        print("Deleted", self.summary_ids[self.page - 1])
+        self.summary_ids.remove(self.summary_ids[self.page - 1])
 
         if len(self.pages) <= 1:
-            default_embed = embed_generator("No summaries found", "Use the !summary command to start generating summaries")
+            default_embed = embed_generator(
+                "No summaries found",
+                "Use the !summary command to start generating summaries",
+            )
             self.pages = [default_embed]
             self.max_num = len(self.pages)
             self.page = 0
             await interaction.response.edit_message(embed=self.pages[self.page])
 
         else:
-            self.pages.remove(self.pages[self.page-1])
+            self.pages.remove(self.pages[self.page - 1])
             self.max_num = len(self.pages)
             if self.page >= 2:
                 self.page -= 1
@@ -90,60 +102,75 @@ class SummariesView(discord.ui.View):
                 await interaction.response.edit_message(embed=self.pages[self.page - 1])
 
 
-
-
 class Summaries(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
     @commands.command(name="summaries")
-    async def summaries(self, ctx, num: int = 1, priv = None):
+    async def summaries(self, ctx, num: int = 1, priv=None):
         """Provides an embed of all the summaries generated by the given user and buttons to itterate through them
         args:
             num (int): Summary number to start at"""
         try:
             num = int(num)
         except ValueError:
-            await ctx.send(":warning: Incorrect use of the command, use !help for more information")
+            await ctx.send(
+                ":warning: Incorrect use of the command, use !help for more information"
+            )
 
         response = get_summaries(ctx.author.id, ctx.guild.id)
 
         if int(response.status_code) != 200 or response.json() == None:
-            await ctx.send("Please login to use the summaries command by using !login and generate summaries")
+            await ctx.send(
+                "Please login to use the summaries command by using !login and generate summaries"
+            )
             return
 
-        summaries_list = [i for i in response.json() if (str(ctx.author.id) in i.values()) and (str(ctx.guild.id) in i.values())]
+        summaries_list = [
+            i
+            for i in response.json()
+            if (str(ctx.author.id) in i.values()) and (str(ctx.guild.id) in i.values())
+        ]
         summary_ids = [i["summary_id"] for i in summaries_list]
         print(summary_ids)
-        #bound checking
+        # bound checking
         if num > len(summaries_list):
             num = len(summaries_list)
-        if num<1:
+        if num < 1:
             num = 1
 
         pages = []
 
-        #generates embeds for every summary for user and appends it to the pages list
+        # generates embeds for every summary for user and appends it to the pages list
         for i in summaries_list:
             index = summaries_list.index(i)
-            pages.append(embed_generator(title=f"Summary {index+1}:",  text=i['summary'], summary_id=summary_ids[index]))
+            pages.append(
+                embed_generator(
+                    title=f"Summary {index+1}:",
+                    text=i["summary"],
+                    summary_id=summary_ids[index],
+                )
+            )
 
-
-        #if no summarries are generated by the user
+        # if no summarries are generated by the user
         if len(pages) == 0:
             await ctx.send(f"No summaries generated by {ctx.author.name}")
             return
         if priv is None:
-            await ctx.send(embed = pages[num-1],
-                            view=SummariesView(pages=pages, num=num, summary_ids=summary_ids, id = ctx.author.id))
-        if priv in ['p', 'priv', 'private', 'dm']:
-            await ctx.author.send(embed = pages[num-1],
-                            view=SummariesView(pages=pages, num=num, summary_ids=summary_ids, id = ctx.author.id))
-
-
-
+            await ctx.send(
+                embed=pages[num - 1],
+                view=SummariesView(
+                    pages=pages, num=num, summary_ids=summary_ids, id=ctx.author.id
+                ),
+            )
+        if priv in ["p", "priv", "private", "dm"]:
+            await ctx.author.send(
+                embed=pages[num - 1],
+                view=SummariesView(
+                    pages=pages, num=num, summary_ids=summary_ids, id=ctx.author.id
+                ),
+            )
 
 
 async def setup(bot):
     await bot.add_cog(Summaries(bot))
-

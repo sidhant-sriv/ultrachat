@@ -1,13 +1,12 @@
 import requests
 import os
 import dotenv
+
 dotenv.load_dotenv()
 
 
-
-
-def create_summary(data:dict):
-    '''
+def create_summary(data: dict):
+    """
     data : {
                 "content": str(summary),
                 "server_id": str(ctx.message.guild.id),
@@ -15,7 +14,7 @@ def create_summary(data:dict):
                 "user_id": str(ctx.author.id)
             }
     stores this data using mongodb on backend server
-    '''
+    """
     print("sending data to server")
     url = os.getenv("CREATE_SUMMARY_URL")
     headers = {"Content-Type": "application/json"}
@@ -26,10 +25,10 @@ def create_summary(data:dict):
 
 
 def get_summaries(id, server_id):
-    '''
-        id:str = ctx.author.id
-        server_id:str = ctx.guild.id
-    '''
+    """
+    id:str = ctx.author.id
+    server_id:str = ctx.guild.id
+    """
 
     print("getting summaries")
     url = os.getenv("GET_SUMMARY_URL")
@@ -40,8 +39,9 @@ def get_summaries(id, server_id):
 
     return response
 
+
 def update_summary(data):
-    '''
+    """
             data : {
                 "content": str(summary),
                 "server_id": str(ctx.message.guild.id),
@@ -49,7 +49,7 @@ def update_summary(data):
                 "user_id": str(ctx.author.id)
             }
     updates data on backend server
-    '''
+    """
     url = os.getenv("UPDATE_SUMMARY_URL")
     headers = {"Content-Type": "application/json"}
     response = requests.put(url, headers=headers, json=data)
@@ -58,7 +58,7 @@ def update_summary(data):
     return response
 
 
-def del_summary(summary_id:str, id):
+def del_summary(summary_id: str, id):
     print("deleting summary")
     url = os.getenv("DELETE_SUMMARY_URL")
     headers = {"ID": str(id)}
@@ -67,6 +67,3 @@ def del_summary(summary_id:str, id):
     print(response.status_code, response.json())
 
     return response
-
-
-

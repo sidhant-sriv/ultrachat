@@ -5,22 +5,28 @@ import wikipedia
 
 class Info(commands.Cog):
     """Info giving commands"""
+
     def __init__(self, bot):
         self.bot = bot
 
-
-    @commands.command(name = 'wiki', description="Wikipedia")
+    @commands.command(name="wiki", description="Wikipedia")
     async def wiki(self, ctx, *, query):
         """Wikipedia search"""
         try:
             t = str(wikipedia.search(query)[0].encode("utf-8"))
-            res = discord.Embed(title=str(t).title()[
-                                2:-1], description=wikipedia.summary(t, sentences=4))
+            res = discord.Embed(
+                title=str(t).title()[2:-1],
+                description=wikipedia.summary(t, sentences=4),
+            )
             res.set_thumbnail(url=wikipedia.page(t).images[0])
             # res.set_image(url=wikipedia.page(t).images[1])
             await ctx.send(embed=res)
         except Exception:
-            await ctx.send(f"Here is a page for info on {query} <https://en.wikipedia.org/wiki/"+query.title()+">")
+            await ctx.send(
+                f"Here is a page for info on {query} <https://en.wikipedia.org/wiki/"
+                + query.title()
+                + ">"
+            )
 
 
 async def setup(bot):
