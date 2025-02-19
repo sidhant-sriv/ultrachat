@@ -1,63 +1,106 @@
-[![GDSC VIT](https://user-images.githubusercontent.com/56252312/159312411-58410727-3933-4224-b43e-4e9b627838a3.png#gh-light-mode-only)](https://dscvit.com/)
+Here’s the corrected version of your text with spelling and grammatical mistakes fixed:  
 
-## UltraChat
-
-
-#### A Discord bot to supercharge your productivity in servers
-
-[](https://github.com/GDGVIT/template#--insert-project-description-here--)
-This repository contains the the code for the the discord bot Ultra-Chat. 
-
-# Installation and running UltraChat
 ---
-You need to have Python installed along with a developer account on discord. Visit their developer's portal and create a bot application and get it's token. Clone the repository using 
-- `git clone https://github.com/GDGVIT/UltraChat.git` 
-- `cd ultrachat`
 
-1. check .env.example and get all the required api keys 
-	- [HuggingFace api](https://huggingface.co/settings/tokens)
-	- [Groq api](https://console.groq.com/keys)
-	- [Discord api](https://discord.com/developers/applications)
-	- [Cohere api](https://dashboard.cohere.com/api-keys)
+[![GDSC VIT](https://user-images.githubusercontent.com/56252312/159312411-58410727-3933-4224-b43e-4e9b627838a3.png#gh-light-mode-only)](https://dscvit.com/)  
 
-2. Host Ultra-chat-backend and provide the respective endpoints
+## UltraChat  
 
-3. Remove the .example from the end of the filename, and this will contain all client secrets for your projects
- 
-4. It is recommended to create a python virtual environment 
-- Windows
- ```shell
- python -m venv venv
- .\venv\Scripts\activate
-```
-- Linux and MacOS
+#### A Discord bot to supercharge your productivity in servers  
+
+[](https://github.com/GDGVIT/template#--insert-project-description-here--)  
+
+This repo contains the code for **UltraChat**, a Discord bot aimed at boosting productivity in highly active Discord servers where keeping up with chat is imperative but difficult to do simultaneously.  
+
+With common Discord bot functionality, such as moderation tools and some fun commands for memes and random interests like cryptography, it also includes features for chat summaries and querying based on all collected chats within a certain server. The summaries are then stored in a database for future use.  
+
+---
+
+### **Summarization**  
+
+The summary engine for this bot is built using **LangChain**, leveraging a mix of **map-reduce** and **clustering** to handle extremely large quantities of text. The summarization engine follows these steps:  
+
+- **Collection**: The text within the chats is collected and passed to the summarization engine.  
+- **Chunking**: The text is split into chunks of a given length.  
+- **Embedding Generation**: These chunks are processed through an embedding model (**embed-english-v3.0 via Cohere**) to generate their corresponding vector embeddings, which store the semantic meaning of the chunks.  
+- **Clustering**: The chunks are clustered via **K-Means clustering** (where every 9 chunks are clustered together, with a maximum of 11; these numbers were chosen somewhat arbitrarily).  
+- **Map-Reduce**: The most central chunk of each cluster is chosen as the average of the clusters and summarized individually. All these summaries are then combined and summarized again.  
+
+While this method may result in some loss of detail, making it a poor choice for **needle-in-a-haystack** problems, it is highly efficient for general summarization tasks. By grouping similar text into clusters and selecting the most relevant chunk to summarize, the engine significantly reduces processing time and cost, as less text needs to be handled by the LLM.  
+
+For cases where **specific** questions need to be answered, all stored chats and their respective vector embeddings are stored in a **vector database (ChromaDB)** for quick querying via a **RAG (Retrieval-Augmented Generation) pipeline**. Read more about RAG [here](https://huggingface.co/docs/transformers/en/model_doc/rag).  
+
+The LLMs used are hosted on **Groq**, which provides incredibly high inference speeds. The **LLaMA family of models** was chosen due to their strong performance among open-source models.  
+
+---
+
+## **Installation and Running UltraChat**  
+
+You need to have **Python** installed along with a **Discord developer account**. Visit the [Discord Developer Portal](https://discord.com/developers/applications), create a bot application, and obtain its token.  
+
+Clone the repository using:  
 ```shell
-source myenv/bin/activate
+git clone https://github.com/GDGVIT/ultra-chat-bot.git
+cd ultrachat
 ```
 
-5. Install the project dependencies using (It is recommended to use python >=3.10)
+### **1. Configure API Keys**  
+Check `.env.example` and obtain all the required API keys:  
+
+- [Hugging Face API](https://huggingface.co/settings/tokens)  
+- [Groq API](https://console.groq.com/keys)  
+- [Discord API](https://discord.com/developers/applications)  
+- [Cohere API](https://dashboard.cohere.com/api-keys)  
+
+### **2. Host UltraChat Backend**  
+Ensure that the UltraChat backend is hosted and provide the respective endpoints.  
+
+### **3. Set Up the Environment File**  
+Rename `.env.example` to `.env`, which will contain all the required client secrets.  
+
+### **4. Create a Virtual Environment (Recommended)**  
+#### **Windows**  
 ```shell
-pip3 install requirements.txt
-
+python -m venv venv
+.\venv\Scripts\activate
 ```
-6. Run the main script
+#### **Linux and macOS**  
+```shell
+source venv/bin/activate
+```
+
+### **5. Install Dependencies**  
+It is recommended to use **Python >= 3.10**.  
+```shell
+pip install -r requirements.txt
+```
+
+### **6. Run the Main Script**  
 ```shell
 python app.py
 ```
-# Run using Docker
 
-1. Install Docker
+---
 
-2. Make sure all the credentials are available in the .env file as described above
+## **Running UltraChat with Docker**  
 
-3. Run the command
+### **1. Install Docker**  
+Ensure Docker is installed on your system.  
+
+### **2. Configure Credentials**  
+Make sure all credentials are properly set in the `.env` file as described earlier.  
+
+### **3. Build and Run Using Docker Compose**  
 ```shell
 docker-compose build
 docker-compose up
 ```
 
-Get the Bot invite link (OAuth2 URL) from your discord developer portal, invite the bot into a server and run the !help command to get a list of commands and start using UltraChat
+---
 
+### **Getting Started**  
+
+Once the bot is running, obtain the bot's invite link (OAuth2 URL) from the **Discord Developer Portal**, invite it to your server, and run the `!help` command to get a list of available commands and start using **UltraChat**! 🚀
 
 ## Contributors
 ---
