@@ -79,7 +79,7 @@ Get the Bot invite link (OAuth2 URL) from your discord developer portal, invite 
 		</td>
 	<tr align="center">
 		<td>
-		Sidhant Srivastav
+		Sidhant Srivastava
 		<p align="center">
 			<img src = "https://avatars.githubusercontent.com/u/66166455?v=4" width="150" height="150">
 		</p>
