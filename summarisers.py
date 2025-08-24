@@ -42,6 +42,8 @@ def large_summariser(file_name):
 
     vectors = embeddings.embed_documents([x.page_content for x in docs])
 
+
+
     num_clusters = num_documents // 9 + 2
 
     print(f"Number of clusters {num_clusters}")
@@ -144,4 +146,4 @@ Ensure the summary is clear, thorough, and easy to understand, leaving no import
 
 
 if __name__ == "__main__":
-    large_summariser("./chats/ihavenofriendsexcepthuda/OG Gamer Boy Swag/general.txt")
+    print(large_summariser("sample.txt"))
